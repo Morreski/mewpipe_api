@@ -13,7 +13,6 @@ var BaseModel = {
         formatted_model[key] = model[key];
       }
     }
-
     return formatted_model;
   },
 
@@ -34,32 +33,38 @@ var BaseModel = {
     errorCallback   = errorCallback || function(){};
     getTheDeleted   = getTheDeleted || false;
 
-    var params = { _id : id };
-
-    params.deleted = getTheDeleted;
+    var params = {
+      _id : id,
+      deleted : getTheDeleted
+    };
 
     var that = this;
-    this.model.find(params, function(err, video){
-      err ? errorCallback(err) : successCallback(that._format(video));
+    this.model.findOne(params, function(err, model){
+      err ? errorCallback(err) : successCallback(that._format(model));
     });
   },
-/*
+
   findAll : function(successCallback, errorCallback, getTheDeleted){
     errorCallback   = errorCallback || function(){};
     getTheDeleted   = getTheDeleted || false;
 
-    Video.find({ deleted : getTheDeleted }, function(err, videos){
-        err ? errorCallback(err) : successCallback(videos);
+    var that = this;
+    this.model.find({ deleted : getTheDeleted }, function(err, models){
+      var model_list = []
+      for(index in models) {
+        model = models[index]
+        model_list.push(that._format(model));
+      }
+        err ? errorCallback(err) : successCallback(model_list);
     });
   },
 
   edit : function(id, updates, successCallback, errorCallback){
     errorCallback   = errorCallback || function(){};
 
-    updates.modified = Date.now();
-
-    Video.findByIdAndUpdate(id, updates, function(err, video){
-        err ? errorCallback(err) : successCallback(video);
+    var that = this;
+    this.model.findByIdAndUpdate(id, updates, function(err, model){
+        err ? errorCallback(err) : successCallback(that._format(model));
     });
   },
 
@@ -68,7 +73,7 @@ var BaseModel = {
     forcedDeletion  = forcedDeletion || false;
 
     if(forcedDeletion){
-      Video.findByIdAndRemove(id, function(err, nbDeleted){
+      this.model.findByIdAndRemove(id, function(err, nbDeleted){
         callback(err, nbDeleted);
       });
     }else{
@@ -77,11 +82,12 @@ var BaseModel = {
         modified  : Date.now()
       };
 
-      Video.findByIdAndUpdate(id, updates, function(err, video){
-        callback(err, video);
+      var that = this;
+      this.model.findByIdAndUpdate(id, updates, function(err, model){
+        callback(err, that._format(model));
       });
     }
-  }*/
+  }
 }
 
 module.exports = BaseModel;

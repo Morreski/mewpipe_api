@@ -1,6 +1,4 @@
 var videoModel =  new(require("../models/video"))();
-var videoModel =  new(require("../models/video"))();
-
 
 
 var viewVideo = function(req, res){
@@ -42,10 +40,8 @@ var addVideo = function(req, res){
   }
 
   var errorCallback = function(err){
-    console.log(err);
     res.sendStatus(500);
   }
-  console.log(videoModel);
   videoModel.save(video, successCallback, errorCallback);
 }
 
@@ -60,7 +56,6 @@ var editVideo = function(req, res){
   }
 
   var errorCallback = function(err){
-    console.log(err);
     res.sendStatus(500);
   }
 
