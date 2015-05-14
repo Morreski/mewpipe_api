@@ -1,4 +1,7 @@
-var videoModel = require("../models/video");
+var videoModel =  new(require("../models/video"))();
+var videoModel =  new(require("../models/video"))();
+
+
 
 var viewVideo = function(req, res){
   var id = req.params.id;
@@ -42,7 +45,7 @@ var addVideo = function(req, res){
     console.log(err);
     res.sendStatus(500);
   }
-
+  console.log(videoModel);
   videoModel.save(video, successCallback, errorCallback);
 }
 

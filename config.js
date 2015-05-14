@@ -12,5 +12,5 @@ module.exports = {
         PRIVATELINK : 1,
         PRIVATE     : 2
     },
-    port : 8081
+    port : 8080
 }
