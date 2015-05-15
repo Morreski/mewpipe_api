@@ -1,4 +1,5 @@
 var videoModel =  new(require("../models/video"))();
+var tagModel = new(require("../models/tag"))();
 var errors = require("../exceptions/base_errors");
 
 
@@ -32,14 +33,26 @@ var listVideo = function(req, res){
 
 var addVideo = function(req, res){
   var video = req.body;
-//  var tags = req.body["tags"];
-
-  var successCallback = function(video){
-    res.send(video);
-  }
+  var tags = video['tags'];
 
   var errorCallback = function(err){
     errors.RequestError(res, err);
+  }
+
+  var successCallback = function(video){
+
+    var bindTagAndVideo = function(tag) {
+      tag.videos.push(video._id);
+      video.tag.push(tag._id);
+      tagModel.save(tag)
+      videoModel.save(video);
+    }
+
+    for (tagName in tags) {
+      tag = tagModel.findOneOrCreate({'name' : tagName}, bindTagAndVideo, errorCallback);
+    }
+
+    res.send(video);
   }
 
   videoModel.save(video, successCallback, errorCallback);

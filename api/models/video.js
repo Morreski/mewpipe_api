@@ -1,6 +1,5 @@
-
 var Video = mongoose.model("Video", new mongoose.Schema({
-    title       : { type : String,  required : true },
+  title       : { type : String,  required : true },
 
     author      : { type : mongoose.Schema.ObjectId, ref : "User" }, //FIXME , required: true },
 
@@ -22,13 +21,14 @@ var Video = mongoose.model("Video", new mongoose.Schema({
     deleted     : { type : Boolean, default : false },
     created     : { type : Date,    default : Date.now },
     modified    : { type : Date,    default : Date.now },
+
+    tags : [ {type :mongoose.Schema.ObjectId, ref : "Tag" }]
   }));
 
 var VideoModel = function() {
 
   this.exposed =  ['title', 'author', 'description', 'views', 'access', 'shared_nb', 'created', 'modified', 'is_online', 'current_state', 'confidentiality' ];
   this.model = Video;
-
 
   this.STATE_CHOICE = {
     "NEW" : 0,
