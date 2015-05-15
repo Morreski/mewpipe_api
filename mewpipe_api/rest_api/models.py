@@ -1,10 +1,9 @@
 from django.db import models
-
-import uuid
+from rest_api.shortcuts import generate_uuid
 # Create your models here.
 
 class BaseModel(models.Model):
-  id = models.UUIDField(primary_key = True, default=uuid.uuid4, editable=False)
+  uid = models.UUIDField(default=generate_uuid, editable=False)
   creation_date = models.DateTimeField(auto_now_add=True)
   edition_date = models.DateTimeField(auto_now=True)
 
