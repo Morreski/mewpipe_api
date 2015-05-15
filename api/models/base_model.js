@@ -63,7 +63,7 @@ var BaseModel = {
     errorCallback   = errorCallback || function(){};
 
     var that = this;
-    this.model.findByIdAndUpdate(id, updates, function(err, model){
+    this.model.findByIdAndUpdate(id, updates, {'new': true}, function(err, model){
         err ? errorCallback(err) : successCallback(that._format(model));
     });
   },
