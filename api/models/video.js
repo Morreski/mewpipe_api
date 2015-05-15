@@ -2,7 +2,7 @@
 var Video = mongoose.model("Video", new mongoose.Schema({
     title       : { type : String,  required : true },
 
-    author      : { type : mongoose.Schema.ObjectId, ref : "User", required: true },
+    author      : { type : mongoose.Schema.ObjectId, ref : "User" }, //FIXME , required: true },
 
     description : { type : String },
     views       : { type : Number,  default : 0 },
@@ -14,8 +14,9 @@ var Video = mongoose.model("Video", new mongoose.Schema({
     confidentiality : { type: Number, default: 0 },
 
     cover       : {
-      data : { type: Buffer, required: true },
-      contentType : {type: String, required : true }
+      data : { type: Buffer, default: null },
+      contentType : {type: String, default: null },
+      required : false
     },
 
     deleted     : { type : Boolean, default : false },
@@ -25,7 +26,7 @@ var Video = mongoose.model("Video", new mongoose.Schema({
 
 var VideoModel = function() {
 
-  this.exposed =  ['title', 'author', 'description', 'views', 'access', 'shared_nb', 'created', 'modified'];
+  this.exposed =  ['title', 'author', 'description', 'views', 'access', 'shared_nb', 'created', 'modified', 'is_online', 'current_state', 'confidentiality' ];
   this.model = Video;
 
 
