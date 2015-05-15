@@ -7,5 +7,6 @@ module.exports = {
     database : {
         url : "mongodb://localhost/mewpipe"
     },
-    port : 8080
+    port : 8080,
+    DEBUG : true
 }
