@@ -31,6 +31,10 @@ class Tag(BaseModel):
 
   serialized = BaseModel.serialized + ('name', 'videos')
 
+  def save(self, *args, **kwargs):
+    self.name = self.name.replace(' ', '')
+    BaseModel.save(self, *args, **kwargs)
+
 class VideoTag(BaseModel):
   SECONDARY = 0
   PRIMARY = 1
