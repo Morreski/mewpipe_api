@@ -1,25 +1,24 @@
 from django.core.exceptions import ObjectDoesNotExist
-from .exceptions import InternalError
+from django.http import HttpResponse
+from django.utils.html import strip_tags
+from rest_framework.renderers import JSONRenderer
+from rest_framework.serializers import CharField
 from hashlib import md5
 import uuid
 
-def get_by_code(Model, code):
+def get_by_uid(Model, uid):
   try:
-    return Model.objects.get(code=code)
+    return Model.objects.get(uid=uid)
   except ObjectDoesNotExist:
     return None
 
-def update_object(obj, dict_fields, *locked_fields):
-  locked_fields = locked_fields + tuple(['id', 'code'])
+class HtmlCleanField(CharField):
 
-  for k,v in dict_fields.iteritems():
-    if k not in obj._meta.get_all_field_names():
-      raise InternalError("UNKNOWN_FIELD", "Unknown field {field} for the object {obj}", field=k, obj=obj._meta.model_name.title())
+  def to_internal_value(self, data):
+    value = CharField.to_internal_value(self, data)
+    value = strip_tags(value)
+    return value
 
-    if k in locked_fields:
-      raise InternalError("FORBIDDEN_ACCESS", "You are not allowed to edit the field: '{field}'", field=k)
-
-    obj.__dict__[k] = v
 
 def compute_md5(image_file):
     emdaicink = md5()
@@ -35,6 +34,12 @@ def file_upload_to(instance, filename):
   name, extension = filename.rsplit(".", 1)
   return str.join('/', [instance.directory.get_full_path(), instance.code + '.' + extension])
   #return os.path.join(instance.directory.get_full_path(), instance.code + '.' + extension)
+
+class JsonResponse(HttpResponse):
+  def __init__(self, data, **kwargs):
+    content = JSONRenderer().render(data)
+    kwargs["content_type"] = 'application/json'
+    HttpResponse.__init__(self, content, **kwargs)
 
 def generate_uuid():
   return uuid.uuid4().hex
