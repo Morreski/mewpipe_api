@@ -9,6 +9,7 @@ class VideoSerializer(serializers.ModelSerializer):
   class Meta:
     model = Video
     fields = Video.serialized
+    depth = 1
 
 class TagSerializer(serializers.ModelSerializer):
   name = HtmlCleanField(max_length=100 )
