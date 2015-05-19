@@ -60,4 +60,4 @@ Temporary Items
 .apdisk
 
 #custom
-mewpipe_api/settings_local.py
+settings_local.py
