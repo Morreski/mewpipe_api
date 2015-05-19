@@ -2,16 +2,26 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from rest_framework import generics
 
-from rest_api.shortcuts import JsonResponse, get_by_uid
+from rest_api.shortcuts import JsonResponse, get_by_uid, get_query
 from rest_api.models import Video, Tag, VideoTag
 from rest_api.serializers import VideoSerializer
+from rest_api.paginators import VideoPaginator
 
 from django.views.generic import View
 
 class VideoControllerGeneral(generics.ListCreateAPIView):
 
-  queryset = Video.objects.all()
   serializer_class = VideoSerializer
+  pagination_class = VideoPaginator
+
+  def get_queryset(self):
+    queryset = Video.objects.all()
+    search_string = self.request.query_params.get('s', None)
+
+    if search_string:
+      search_query = get_query(search_string, Video.search_indexes)
+      queryset = Video.objects.filter(search_query)
+    return queryset
 
   def __init__(self, *args, **kwargs):
     self.tagNames = []

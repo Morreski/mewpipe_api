@@ -24,6 +24,12 @@ class Video(BaseModel):
   tags = models.ManyToManyField("Tag", through="VideoTag")
 
   serialized = BaseModel.serialized + ('title', 'author', 'tags', 'description')
+  search_indexes = ['title', 'description', 'tag__name']
+
+  @classmethod
+  def search(cls, search_string):
+    return
+
 
 class Tag(BaseModel):
   name = models.CharField(max_length=100, db_index=True, unique=True)
@@ -49,4 +55,3 @@ class VideoTag(BaseModel):
   tag_level = models.IntegerField(choices=LEVEL_CHOICES)
 
   serialized = BaseModel.serialized + ('tag', 'video', 'tag_level')
-

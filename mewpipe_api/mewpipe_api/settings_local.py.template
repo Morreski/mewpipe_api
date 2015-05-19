@@ -2,6 +2,9 @@
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
+PAGINATION_LIMIT = 100
+VIDEO_PAGINATION_LIMIT = 25
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',

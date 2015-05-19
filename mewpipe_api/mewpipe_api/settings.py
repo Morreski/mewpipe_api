@@ -28,7 +28,9 @@ SECRET_KEY = '$y(^e0r%yzum0m*$3k4r2tdf4vh3itop8k=c0@3_o7(9_a+4=d'
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+REST_FRAMEWORK = {
+  'DEFAULT_PAGINATION_CLASS': 'rest_api.paginators.BasePaginator',
+}
 
 # Application definition
 
