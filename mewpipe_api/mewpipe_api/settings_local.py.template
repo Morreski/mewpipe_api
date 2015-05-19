@@ -6,6 +6,7 @@ PAGINATION_LIMIT = 100
 VIDEO_PAGINATION_LIMIT = 25
 
 VIEW_TIMEOUT = 60 #Decide interval between two view incrementation
+VIEW_TTL = 24 #hours, View time to live
 
 DATABASES = {
     'default': {
