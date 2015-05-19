@@ -1,4 +1,7 @@
 from django.db import models
+from django.db.models.aggregates import Sum
+from django.utils import timezone
+from django.conf import settings
 import uuid
 # Create your models here.
 
@@ -14,7 +17,20 @@ class BaseModel(models.Model):
 
 
 class User(BaseModel):
+  watched = models.ManyToManyField('Video', through='View')
+
+  def watch(self, video):
+    view, created = self.view_set.get_or_create(video=video)
+    view.update()
+
+
+class TemporaryUser(User):
+  ip = models.GenericIPAddressField(unpack_ipv4=True)
+
+
+class UserAccount(User):
   pass
+
 
 class Video(BaseModel):
   title = models.CharField(max_length = 40, db_index=True)
@@ -23,12 +39,29 @@ class Video(BaseModel):
 
   tags = models.ManyToManyField("Tag", through="VideoTag")
 
-  serialized = BaseModel.serialized + ('title', 'author', 'tags', 'description')
+  total_view_count = models.IntegerField(default = 0)
+  daily_view_count = models.IntegerField(default = 0)
+  weekly_view_count = models.IntegerField(default = 0)
+  monthly_view_count = models.IntegerField(default = 0)
+  yearly_view_cont = models.IntegerField(default = 0)
+
+  watchers = models.ManyToManyField('User', through='View', related_name='watchers')
+
+  serialized = BaseModel.serialized + (
+      'title', 'author', 'tags', 'description',
+      'total_view_count', 'daily_view_count', 'weekly_view_count', 'monthly_view_count', 'yearly_view_cont',
+  )
+
   search_indexes = ['title', 'description', 'tag__name']
 
   @classmethod
   def search(cls, search_string):
     return
+
+  @property
+  def total_views(self):
+    computed_views = self.view_set.all().aggregate(Sum('counter'))['counter__sum']
+    return self.total_view_count + computed_views
 
 
 class Tag(BaseModel):
@@ -40,6 +73,21 @@ class Tag(BaseModel):
   def save(self, *args, **kwargs):
     self.name = self.name.replace(' ', '')
     BaseModel.save(self, *args, **kwargs)
+
+class View(BaseModel):
+  user  = models.ForeignKey(User)
+  video = models.ForeignKey(Video)
+  counter = models.IntegerField(default = 1)
+
+  def update(self):
+    if (timezone.now() - timezone.timedelta(minutes=settings.VIEW_TIMEOUT) ) < self.edition_date:
+      return (self, False)
+    self.counter += 1
+    self.save()
+    return (self, True)
+
+  class Meta:
+    unique_together = ( ('video', 'user'), )
 
 class VideoTag(BaseModel):
   SECONDARY = 0

@@ -21,6 +21,12 @@ class VideoSerializer(serializers.ModelSerializer):
   description = HtmlCleanField(required=False)
   tags = TagSerializer(many=True, read_only=True)
 
+  total_view_count = serializers.IntegerField(read_only=True)
+  daily_view_count = serializers.IntegerField(read_only=True)
+  weekly_view_count = serializers.IntegerField(read_only=True)
+  monthly_view_count = serializers.IntegerField(read_only=True)
+  yearly_view_cont = serializers.IntegerField(read_only=True)
+
   class Meta:
     model = Video
     fields = Video.serialized
