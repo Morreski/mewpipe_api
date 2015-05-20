@@ -44,8 +44,9 @@ INSTALLED_APPS = (
     #External Libs
     'django_extensions',
     'rest_framework',
+    'watson',
 
-    'rest_api',
+    'rest_api.apps.RestAPIAppConfig',
 )
 
 MIDDLEWARE_CLASSES = (

@@ -69,10 +69,6 @@ class Video(BaseModel):
     self.total_share_count += len(dest_list)
     self.save()
 
-  @classmethod
-  def search(cls, search_string):
-    return
-
   @property
   def total_views(self):
     computed_views = self.view_set.all().aggregate(Sum('counter'))['counter__sum']

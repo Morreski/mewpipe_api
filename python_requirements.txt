@@ -1,5 +1,6 @@
 django
 django-extensions
 djangorestframework
+django_watson
 mySQL
 pyyaml
