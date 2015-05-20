@@ -31,7 +31,13 @@ def normalize_query(query_string,
         ['some', 'random', 'words', 'with quotes', 'and', 'spaces']
 
     '''
-    return [normspace(' ', (t[0] or t[1]).strip()).lower() for t in findterms(query_string)]
+    terms = [normspace(' ', (t[0] or t[1]).strip()).lower() for t in findterms(query_string)]
+    for index, term in enumerate(terms):
+      if index+1 == len(terms):
+        return terms
+      if term in ["le", "la", "les", "du", "de", "un", "une", "the"] or len(term) <= 1:
+        terms[index] = term + " " + terms[index+1]
+
 
 def get_query(query_string, search_fields):
     ''' Returns a query, that is a combination of Q objects. That combination
