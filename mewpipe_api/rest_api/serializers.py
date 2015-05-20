@@ -15,6 +15,10 @@ class TagSerializer(serializers.ModelSerializer):
     model = Tag
     fields = Tag.serialized
 
+class ShareSerializer(serializers.Serializer):
+  sender_address = serializers.EmailField()
+  dest_addresses = serializers.ListField(child=serializers.EmailField())
+  video_link     = HtmlCleanField()
 
 class VideoSerializer(serializers.ModelSerializer):
   title = HtmlCleanField(max_length=40)

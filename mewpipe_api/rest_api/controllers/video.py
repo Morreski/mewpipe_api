@@ -4,7 +4,7 @@ from rest_framework import generics
 
 from rest_api.shortcuts import JsonResponse, get_by_uid, get_query
 from rest_api.models import Video, Tag, VideoTag
-from rest_api.serializers import VideoSerializer
+from rest_api.serializers import VideoSerializer, ShareSerializer
 from rest_api.paginators import VideoPaginator
 
 from django.views.generic import View
@@ -76,3 +76,29 @@ class VideoControllerSpecific(View):
     video.delete()
     return JsonResponse({}, status=204)
 
+class ShareController(View):
+
+  @csrf_exempt
+  def dispatch(self, *args, **kwargs):
+    return View.dispatch(self, *args, **kwargs)
+
+  def post(self, request, *args, **kwargs):
+    uid = kwargs.get("uid")
+    video = get_by_uid(Video, uid)
+    if video is None:
+      return JsonResponse({}, status=404)
+
+    data = JSONParser().parse(request)
+    serializer = ShareSerializer(data=data)
+
+    if not serializer.is_valid():
+      return JsonResponse(serializer.errors, status=400)
+
+    dests   = serializer.data.get('dest_addresses', [])
+    sender  = serializer.data['sender_address']
+    link    = serializer.data['video_link']
+
+    video.share(sender, dests, link)
+
+    s = VideoSerializer(video)
+    return JsonResponse(s.data)

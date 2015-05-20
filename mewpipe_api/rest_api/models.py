@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models.aggregates import Sum
 from django.utils import timezone
 from django.conf import settings
+from django.core.mail import send_mail
 import uuid
 # Create your models here.
 
@@ -61,6 +62,13 @@ class Video(BaseModel):
 
   search_indexes = ['title', 'description', 'tag__name']
 
+  def share(self, sender, dest_list, link):
+    mail = Mail.objects.get(name="videoSharing")
+    mail.send(sender, dest_list, link=link)
+
+    self.total_share_count += len(dest_list)
+    self.save()
+
   @classmethod
   def search(cls, search_string):
     return
@@ -80,6 +88,19 @@ class Tag(BaseModel):
   def save(self, *args, **kwargs):
     self.name = self.name.replace(' ', '')
     BaseModel.save(self, *args, **kwargs)
+
+class Mail(BaseModel):
+  name  = models.CharField(unique=True, max_length=255)
+  subject = models.CharField(max_length=255)
+  body_template = models.TextField()
+
+  def send(self, sender, recipient_list, **kwargs):
+    send_mail(
+      self.subject,
+      self.body_template.format(**kwargs),
+      sender,
+      recipient_list,
+      )
 
 class View(BaseModel):
   user  = models.ForeignKey(User)
