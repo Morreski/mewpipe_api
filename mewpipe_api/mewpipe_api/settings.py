@@ -29,7 +29,6 @@ DEBUG = True
 ALLOWED_HOSTS = []
 REST_FRAMEWORK = {
   'DEFAULT_PAGINATION_CLASS': 'rest_api.paginators.BasePaginator',
-  'DEFAULT_FILTER_BACKENDS': ('rest_framework.filters.DjangoFilterBackend',)
 }
 
 # Application definition
@@ -45,9 +44,8 @@ INSTALLED_APPS = (
     #External Libs
     'django_extensions',
     'rest_framework',
-    'watson',
 
-    'rest_api.apps.RestAPIAppConfig',
+    'rest_api',
 )
 
 MIDDLEWARE_CLASSES = (

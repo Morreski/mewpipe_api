@@ -1,15 +1,15 @@
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from rest_framework import generics
-
+from django.conf import settings
 from rest_api.shortcuts import JsonResponse, get_by_uid, normalize_query
 from rest_api.models import Video, Tag, VideoTag
 from rest_api.serializers import VideoSerializer, ShareSerializer
 from rest_api.paginators import VideoPaginator
 
 from django.views.generic import View
+import itertools
 
-import watson
 
 class VideoControllerGeneral(generics.ListCreateAPIView):
 
@@ -22,19 +22,24 @@ class VideoControllerGeneral(generics.ListCreateAPIView):
     if search_string == '':
       return generics.ListCreateAPIView.list(self, request, *args, **kwargs)
 
-    qs = self.filter_queryset(self.get_queryset()).values_list("uid", flat=True)
-    matched_items, all_results = ([], [])
+    qs = self.get_queryset()
 
-    for _str in normalize_query(search_string):
-      all_results.extend(watson.search(_str))
+    match_sentences, match_tags, match_words = ([], [], [])
+    terms = normalize_query(search_string)
+    for index,term in enumerate(terms):
+      grouped_terms = terms[0:] if index == 0 else terms[0:-index]
+      big_term = ''.join(grouped_terms)
+      match_sentences.extend(list(qs.filter(title__icontains=big_term)))
 
-    for result in set(all_results):
-      if not result.object.uid in qs:
-        continue
-      matched_items.append(result.object)
+    for term in terms:
+      match_words.extend(list(qs.filter(title__icontains=term)))
 
-    page = self.paginate_queryset(matched_items)
-    page.sort(key = lambda x: x.total_view_count, reverse = True)
+    for term in terms:
+      match_tags.extend(list(qs.filter(tag__name__icontains=term)))
+
+    matched_items = list(itertools.chain(match_sentences, match_words, match_tags))[:settings.VIDEO_PAGINATION_LIMIT]
+    videos = sorted(set(matched_items), key=lambda x: matched_items.index(x))
+    page = self.paginate_queryset(videos)
 
     s = self.get_serializer(page, many=True)
     return self.get_paginated_response(s.data)
