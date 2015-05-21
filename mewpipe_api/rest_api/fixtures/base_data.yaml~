@@ -61,14 +61,11 @@
   pk: 1
 
 - fields:
-    name: "videoSharing"
-    creation_date: "2014-02-11 00:00:00"
-    edition_date: "2014-02-11 00:00:00"
     subject: "[MewPipe] - Video Sharing"
     body_template: |
       Hello !
-      I want to share this awesome video with you. Hope you'll enjoy it ! ;)
+I want to share this awesome video with you. Hope you'll enjoy it ! ;)
 
-      Watch it there: {link}
-  model: rest_api.mail
-  pk: 1
+Watch it there: {link}
+    html_body_template: |
+

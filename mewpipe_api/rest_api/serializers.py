@@ -15,11 +15,27 @@ class TagSerializer(serializers.ModelSerializer):
     model = Tag
     fields = Tag.serialized
 
+class ShareSerializer(serializers.Serializer):
+  sender_address = serializers.EmailField()
+  dest_addresses = serializers.ListField(child=serializers.EmailField())
+  video_link     = HtmlCleanField()
 
 class VideoSerializer(serializers.ModelSerializer):
   title = HtmlCleanField(max_length=40)
   description = HtmlCleanField(required=False)
   tags = TagSerializer(many=True, read_only=True)
+
+  total_view_count = serializers.IntegerField(read_only=True)
+  daily_view_count = serializers.IntegerField(read_only=True)
+  weekly_view_count = serializers.IntegerField(read_only=True)
+  monthly_view_count = serializers.IntegerField(read_only=True)
+  yearly_view_cont = serializers.IntegerField(read_only=True)
+
+  total_share_count = serializers.IntegerField(read_only=True)
+  daily_share_count = serializers.IntegerField(read_only=True)
+  weekly_share_count = serializers.IntegerField(read_only=True)
+  monthly_share_count = serializers.IntegerField(read_only=True)
+  yearly_share_cont = serializers.IntegerField(read_only=True)
 
   class Meta:
     model = Video

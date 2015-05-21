@@ -1,17 +1,48 @@
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from rest_framework import generics
-
-from rest_api.shortcuts import JsonResponse, get_by_uid
+from django.conf import settings
+from rest_api.shortcuts import JsonResponse, get_by_uid, normalize_query
 from rest_api.models import Video, Tag, VideoTag
-from rest_api.serializers import VideoSerializer
+from rest_api.serializers import VideoSerializer, ShareSerializer
+from rest_api.paginators import VideoPaginator
 
 from django.views.generic import View
+import itertools
+
 
 class VideoControllerGeneral(generics.ListCreateAPIView):
 
-  queryset = Video.objects.all()
   serializer_class = VideoSerializer
+  pagination_class = VideoPaginator
+  queryset = Video.objects.all()
+
+  def list(self, request, *args, **kwargs):
+    search_string = request.GET.get('s', '')
+    if search_string == '':
+      return generics.ListCreateAPIView.list(self, request, *args, **kwargs)
+
+    qs = self.get_queryset()
+
+    match_sentences, match_tags, match_words = ([], [], [])
+    terms = normalize_query(search_string)
+    for index,term in enumerate(terms):
+      grouped_terms = terms[0:] if index == 0 else terms[0:-index]
+      big_term = ''.join(grouped_terms)
+      match_sentences.extend(list(qs.filter(title__icontains=big_term)))
+
+    for term in terms:
+      match_words.extend(list(qs.filter(title__icontains=term)))
+
+    for term in terms:
+      match_tags.extend(list(qs.filter(tag__name__icontains=term)))
+
+    matched_items = list(itertools.chain(match_sentences, match_words, match_tags))[:settings.VIDEO_PAGINATION_LIMIT]
+    videos = sorted(set(matched_items), key=lambda x: matched_items.index(x))
+    page = self.paginate_queryset(videos)
+
+    s = self.get_serializer(page, many=True)
+    return self.get_paginated_response(s.data)
 
   def __init__(self, *args, **kwargs):
     self.tagNames = []
@@ -66,3 +97,29 @@ class VideoControllerSpecific(View):
     video.delete()
     return JsonResponse({}, status=204)
 
+class ShareController(View):
+
+  @csrf_exempt
+  def dispatch(self, *args, **kwargs):
+    return View.dispatch(self, *args, **kwargs)
+
+  def post(self, request, *args, **kwargs):
+    uid = kwargs.get("uid")
+    video = get_by_uid(Video, uid)
+    if video is None:
+      return JsonResponse({}, status=404)
+
+    data = JSONParser().parse(request)
+    serializer = ShareSerializer(data=data)
+
+    if not serializer.is_valid():
+      return JsonResponse(serializer.errors, status=400)
+
+    dests   = serializer.data.get('dest_addresses', [])
+    sender  = serializer.data['sender_address']
+    link    = serializer.data['video_link']
+
+    video.share(sender, dests, link)
+
+    s = VideoSerializer(video)
+    return JsonResponse(s.data)
