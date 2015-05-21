@@ -25,4 +25,3 @@ class VideoSerializer(serializers.ModelSerializer):
     model = Video
     fields = Video.serialized
     depth = 1
-

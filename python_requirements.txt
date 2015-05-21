@@ -3,3 +3,4 @@ django-extensions
 djangorestframework
 mySQL
 pyyaml
+python-social-auth

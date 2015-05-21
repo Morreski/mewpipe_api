@@ -15,6 +15,11 @@ class BaseModel(models.Model):
 
 class User(BaseModel):
   pass
+  """
+  first_name = models.CharField(max_length = 100)
+  last_name  = models.CharField(max_length = 100)
+  birth_date = models.DateTimeField()
+  """
 
 class Video(BaseModel):
   title = models.CharField(max_length = 40, db_index=True)
@@ -49,4 +54,3 @@ class VideoTag(BaseModel):
   tag_level = models.IntegerField(choices=LEVEL_CHOICES)
 
   serialized = BaseModel.serialized + ('tag', 'video', 'tag_level')
-
