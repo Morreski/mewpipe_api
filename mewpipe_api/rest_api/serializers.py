@@ -36,13 +36,13 @@ class VideoSerializer(serializers.ModelSerializer):
   daily_view_count = serializers.IntegerField(read_only=True)
   weekly_view_count = serializers.IntegerField(read_only=True)
   monthly_view_count = serializers.IntegerField(read_only=True)
-  yearly_view_cont = serializers.IntegerField(read_only=True)
+  yearly_view_count = serializers.IntegerField(read_only=True)
 
   total_share_count = serializers.IntegerField(read_only=True)
   daily_share_count = serializers.IntegerField(read_only=True)
   weekly_share_count = serializers.IntegerField(read_only=True)
   monthly_share_count = serializers.IntegerField(read_only=True)
-  yearly_share_cont = serializers.IntegerField(read_only=True)
+  yearly_share_count = serializers.IntegerField(read_only=True)
 
   class Meta:
     model = Video

@@ -1,6 +1,7 @@
 django
 django-extensions
 djangorestframework
+django-filter
 mySQL
 pyyaml
 python-social-auth

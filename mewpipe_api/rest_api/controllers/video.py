@@ -1,6 +1,7 @@
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from rest_framework import generics
+from rest_framework import filters
 from django.conf import settings
 from rest_api.shortcuts import JsonResponse, get_by_uid, normalize_query
 from rest_api.models import Video, Tag, VideoTag
@@ -15,7 +16,27 @@ class VideoControllerGeneral(generics.ListCreateAPIView):
 
   serializer_class = VideoSerializer
   pagination_class = VideoPaginator
+  filter_backends = (filters.OrderingFilter, )
+  filter_fields = (
+      'tag__name',
+      'title',
+      'creation_date',
+      'edition_date',
+      'total_view_count',
+      'daily_view_count',
+      'weekly_view_count',
+      'monthly_view_count',
+      'yearly_view_count',
+
+      'total_share_count',
+      'daily_share_count',
+      'monthly_share_count',
+      'weekly_share_count',
+      'yearly_share_count',
+  )
+  ordering_fields = filter_fields
   queryset = Video.objects.all()
+
 
   def list(self, request, *args, **kwargs):
     search_string = request.GET.get('s', '')
