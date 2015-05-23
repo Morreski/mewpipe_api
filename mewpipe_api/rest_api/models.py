@@ -54,6 +54,19 @@ class UserAccount(User):
   serialized = ('first_name', 'last_name', 'email', 'username', 'birth_date', 'is_active')
 
 class Video(BaseModel):
+
+  STATUS_NEW = 0
+  STATUS_UPLOADING = 1
+  STATUS_UPLOADED = 2
+  STATUS_READY = 3
+
+  STATUS_CHOICES = (
+    (STATUS_NEW, "New"),
+    (STATUS_UPLOADING, "Uploading"),
+    (STATUS_UPLOADED, "Uploaded"),
+    (STATUS_READY, "Ready"),
+  )
+
   title = models.CharField(max_length = 40, db_index=True)
   description = models.TextField(blank=True)
   author = models.ForeignKey(User, null = True) #TODO: Remove null=true
@@ -73,6 +86,8 @@ class Video(BaseModel):
   yearly_share_count = models.IntegerField(default = 0)
 
   watchers = models.ManyToManyField('User', through='View', related_name='watchers')
+
+  status = models.IntegerField(default=0, choices=STATUS_CHOICES)
 
   serialized = BaseModel.serialized + (
       'title', 'author', 'tags', 'description',
