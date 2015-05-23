@@ -44,13 +44,14 @@ class UserAccount(User):
   first_name  = models.CharField(max_length = 100)
   last_name   = models.CharField(max_length = 100)
   email       = models.CharField(max_length = 100)
+  username    = models.CharField(max_length = 100)
   birth_date  = models.DateTimeField()
   last_login  = models.DateTimeField(blank=True)
   is_active   = models.BooleanField(default=True)
 
   objects = CustomUserManager()
 
-  serialized = ('first_name', 'last_name', 'email', 'birth_date', 'is_active')
+  serialized = ('first_name', 'last_name', 'email', 'username', 'birth_date', 'is_active')
 
 class Video(BaseModel):
 

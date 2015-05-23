@@ -7,6 +7,7 @@ class UserAccountSerializer(serializers.ModelSerializer):
   first_name  = serializers.CharField()
   last_name   = serializers.CharField()
   email       = serializers.CharField()
+  username    = serializers.CharField()
   birth_date  = serializers.DateTimeField()
   is_active   = serializers.BooleanField(read_only=True)
 
