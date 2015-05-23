@@ -1,7 +1,9 @@
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from rest_framework import generics
+from rest_framework import parsers
 from rest_framework import filters
+from rest_framework.views import APIView
 from django.conf import settings
 from rest_api.shortcuts import JsonResponse, get_by_uid, normalize_query
 from rest_api.models import Video, Tag, VideoTag
@@ -114,3 +116,19 @@ class ShareController(View):
 
     s = VideoSerializer(video)
     return JsonResponse(s.data)
+
+class UploadVideoController(APIView):
+  parsers = (parsers.FileUploadParser )
+
+  def post(self, request, *args, **kwargs):
+    uid = kwargs['uid']
+    video = get_by_uid(Video, uid)
+    if video is None:
+      return JsonResponse({}, status = 404)
+
+    with open('/tmp/'+uid, 'wb+') as videoFile:
+      print request.data
+      for chunk in request.data['file'].chunks():
+        videoFile.write(chunk)
+
+    return JsonResponse({})
