@@ -3,6 +3,13 @@ from rest_api.models import Video, Tag
 from rest_api.shortcuts import HtmlCleanField
 
 
+class UserAccountSerializer(serializers.ModelSerializer):
+  first_name  = serializers.CharField()
+  last_name   = serializers.CharField()
+  email       = serializers.CharField()
+  birth_date  = serializers.DateTimeField()
+  is_active   = serializers.BooleanField(read_only=True)
+
 class TagSerializer(serializers.ModelSerializer):
   videos = serializers.SlugRelatedField(
       slug_field = 'uid',

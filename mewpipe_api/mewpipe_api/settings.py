@@ -46,6 +46,7 @@ INSTALLED_APPS = (
     'rest_framework',
 
     'rest_api',
+    'social_auth',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -58,6 +59,20 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
 )
+
+AUTHENTICATION_BACKENDS = (
+    'social_auth.backends.twitter.TwitterBackend',
+    'social_auth.backends.facebook.FacebookBackend',
+    'social_auth.backends.google.GoogleOAuth2Backend',
+    'social_auth.backends.google.GoogleBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+LOGIN_URL           = '/login/'
+LOGIN_REDIRECT_URL  = '/index/'
+LOGIN_ERROR_URL     = '/login-error/'
+
+SOCIAL_AUTH_USER_MODEL = 'rest_api.UserAccount'
 
 ROOT_URLCONF = 'mewpipe_api.urls'
 
