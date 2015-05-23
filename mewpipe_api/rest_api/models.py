@@ -92,7 +92,7 @@ class Video(BaseModel):
   status = models.IntegerField(default=0, choices=STATUS_CHOICES)
 
   serialized = BaseModel.serialized + (
-      'title', 'author', 'tags', 'description', 'status', 'views_statistics', 'share_statistics',
+      'title', 'author', 'tags', 'description', 'status', 'views_statistics', 'shares_statistics',
   )
 
   search_indexes = ['title', 'description', 'tag__name']

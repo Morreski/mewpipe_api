@@ -37,17 +37,8 @@ class VideoSerializer(serializers.ModelSerializer):
   tags = TagSerializer(many=True, read_only=True)
   status = serializers.ChoiceField(Video.STATUS_CHOICES, read_only=True)
 
-  total_view_count = serializers.IntegerField(read_only=True)
-  daily_view_count = serializers.IntegerField(read_only=True)
-  weekly_view_count = serializers.IntegerField(read_only=True)
-  monthly_view_count = serializers.IntegerField(read_only=True)
-  yearly_view_count = serializers.IntegerField(read_only=True)
-
-  total_share_count = serializers.IntegerField(read_only=True)
-  daily_share_count = serializers.IntegerField(read_only=True)
-  weekly_share_count = serializers.IntegerField(read_only=True)
-  monthly_share_count = serializers.IntegerField(read_only=True)
-  yearly_share_count = serializers.IntegerField(read_only=True)
+  views_statistics = serializers.ReadOnlyField()
+  shares_statistics = serializers.ReadOnlyField()
 
   class Meta:
     model = Video
