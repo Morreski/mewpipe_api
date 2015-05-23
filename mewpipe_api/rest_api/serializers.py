@@ -31,6 +31,7 @@ class VideoSerializer(serializers.ModelSerializer):
   title = HtmlCleanField(max_length=40)
   description = HtmlCleanField(required=False)
   tags = TagSerializer(many=True, read_only=True)
+  status = serializers.ChoiceField(Video.STATUS_CHOICES, read_only=True)
 
   total_view_count = serializers.IntegerField(read_only=True)
   daily_view_count = serializers.IntegerField(read_only=True)

@@ -89,7 +89,7 @@ class Video(BaseModel):
   status = models.IntegerField(default=0, choices=STATUS_CHOICES)
 
   serialized = BaseModel.serialized + (
-      'title', 'author', 'tags', 'description',
+      'title', 'author', 'tags', 'description', 'status',
       'total_view_count', 'daily_view_count', 'weekly_view_count', 'monthly_view_count', 'yearly_view_count',
       'total_share_count', 'daily_share_count', 'weekly_share_count', 'monthly_share_count', 'yearly_share_count',
   )
