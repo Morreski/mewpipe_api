@@ -1,4 +1,4 @@
-from django.contrib.auth.base_user import BaseUserManager
+from django.contrib.auth.models import BaseUserManager
 from django.db import models
 from django.db.models.aggregates import Sum
 from django.utils import timezone
@@ -28,18 +28,6 @@ class User(BaseModel):
 class TemporaryUser(User):
   ip = models.GenericIPAddressField(unpack_ipv4=True)
 
-class UserAccount(User):
-  first_name  = models.CharField(max_length = 100)
-  last_name   = models.CharField(max_length = 100)
-  email       = models.CharField(max_length = 100)
-  birth_date  = models.DateTimeField()
-  last_login  = models.DateTimeField(blank=True)
-  is_active   = models.BooleanField(default=True)
-
-  objects = CustomUserManager()
-
-  serialized = ('first_name', 'last_name', 'email', 'birth_date', 'is_active')
-
 class CustomUserManager(BaseUserManager):
   use_in_migrations = True
 
@@ -51,6 +39,18 @@ class CustomUserManager(BaseUserManager):
 
   def create_user(self, fname, lname, birth_date, email=None, **extra_fields):
     return self._create_user(fname, lname, birth_date, email, False, False,**extra_fields)
+
+class UserAccount(User):
+  first_name  = models.CharField(max_length = 100)
+  last_name   = models.CharField(max_length = 100)
+  email       = models.CharField(max_length = 100)
+  birth_date  = models.DateTimeField()
+  last_login  = models.DateTimeField(blank=True)
+  is_active   = models.BooleanField(default=True)
+
+  objects = CustomUserManager()
+
+  serialized = ('first_name', 'last_name', 'email', 'birth_date', 'is_active')
 
 class Video(BaseModel):
   title = models.CharField(max_length = 40, db_index=True)
