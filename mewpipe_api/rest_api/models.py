@@ -63,20 +63,20 @@ class Video(BaseModel):
   daily_view_count = models.IntegerField(default = 0)
   weekly_view_count = models.IntegerField(default = 0)
   monthly_view_count = models.IntegerField(default = 0)
-  yearly_view_cont = models.IntegerField(default = 0)
+  yearly_view_count = models.IntegerField(default = 0)
 
   total_share_count = models.IntegerField(default = 0)
   daily_share_count = models.IntegerField(default = 0)
   weekly_share_count = models.IntegerField(default = 0)
   monthly_share_count = models.IntegerField(default = 0)
-  yearly_share_cont = models.IntegerField(default = 0)
+  yearly_share_count = models.IntegerField(default = 0)
 
   watchers = models.ManyToManyField('User', through='View', related_name='watchers')
 
   serialized = BaseModel.serialized + (
       'title', 'author', 'tags', 'description',
-      'total_view_count', 'daily_view_count', 'weekly_view_count', 'monthly_view_count', 'yearly_view_cont',
-      'total_share_count', 'daily_share_count', 'weekly_share_count', 'monthly_share_count', 'yearly_share_cont',
+      'total_view_count', 'daily_view_count', 'weekly_view_count', 'monthly_view_count', 'yearly_view_count',
+      'total_share_count', 'daily_share_count', 'weekly_share_count', 'monthly_share_count', 'yearly_share_count',
   )
 
   search_indexes = ['title', 'description', 'tag__name']
