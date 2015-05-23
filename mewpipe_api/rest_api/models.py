@@ -74,12 +74,14 @@ class Video(BaseModel):
   tags = models.ManyToManyField("Tag", through="VideoTag")
 
   total_view_count = models.IntegerField(default = 0)
+
   daily_view_count = models.IntegerField(default = 0)
   weekly_view_count = models.IntegerField(default = 0)
   monthly_view_count = models.IntegerField(default = 0)
   yearly_view_count = models.IntegerField(default = 0)
 
   total_share_count = models.IntegerField(default = 0)
+
   daily_share_count = models.IntegerField(default = 0)
   weekly_share_count = models.IntegerField(default = 0)
   monthly_share_count = models.IntegerField(default = 0)
@@ -90,9 +92,7 @@ class Video(BaseModel):
   status = models.IntegerField(default=0, choices=STATUS_CHOICES)
 
   serialized = BaseModel.serialized + (
-      'title', 'author', 'tags', 'description', 'status',
-      'total_view_count', 'daily_view_count', 'weekly_view_count', 'monthly_view_count', 'yearly_view_count',
-      'total_share_count', 'daily_share_count', 'weekly_share_count', 'monthly_share_count', 'yearly_share_count',
+      'title', 'author', 'tags', 'description', 'status', 'views_statistics', 'share_statistics',
   )
 
   search_indexes = ['title', 'description', 'tag__name']
@@ -105,9 +105,30 @@ class Video(BaseModel):
     self.save()
 
   @property
-  def total_views(self):
+  def views_statistics(self):
+    views = {}
+
     computed_views = self.view_set.all().aggregate(Sum('counter'))['counter__sum']
-    return self.total_view_count + computed_views
+    if computed_views is None:
+      computed_views = 0
+
+    views["total"] = self.total_view_count + computed_views
+    views["daily"] = views["total"] - self.daily_view_count
+    views["weekly"] = views["total"] - self.weekly_view_count
+    views["monthly"] = views["total"] - self.monthly_view_count
+    views["yearly"] = views["total"] - self.yearly_view_count
+    return views
+
+  @property
+  def shares_statistics(self):
+    shares = {}
+
+    shares["total"] = self.total_share_count
+    shares["daily"] = shares["total"] - self.daily_share_count
+    shares["weekly"] = shares["total"] - self.weekly_share_count
+    shares["monthly"] = shares["total"] - self.monthly_share_count
+    shares["yearly"] = shares["total"] - self.yearly_share_count
+    return shares
 
   def writeOnDisk(self, file):
 
