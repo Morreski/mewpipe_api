@@ -1,6 +1,12 @@
 - fields:
     creation_date: "2014-02-11 00:00:00"
     edition_date: "2014-02-11 00:00:00"
+  model: rest_api.user
+  pk: 1
+
+- fields:
+    creation_date: "2014-02-11 00:00:00"
+    edition_date: "2014-02-11 00:00:00"
     ip: '127.0.0.1'
   model: rest_api.temporaryuser
   pk: 1
