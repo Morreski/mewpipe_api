@@ -4,7 +4,7 @@ from django.db.models.aggregates import Sum
 from django.utils import timezone
 from django.conf import settings
 from django.core.mail import send_mail
-import uuid
+import os, uuid
 # Create your models here.
 
 class BaseModel(models.Model):
@@ -108,6 +108,21 @@ class Video(BaseModel):
     computed_views = self.view_set.all().aggregate(Sum('counter'))['counter__sum']
     return self.total_view_count + computed_views
 
+  def writeOnDisk(self, file):
+    upload_path = os.path.join(settings.UPLOAD_DIR, 'pending_videos', str(self.uid))
+
+    if not os.path.exists(os.path.dirname(upload_path)):
+        os.makedirs(os.path.dirname(upload_path))
+
+    with open(upload_path, 'wb+') as videoFile:
+      try:
+        for chunk in file.chunks():
+          videoFile.write(chunk)
+      except Exception as e:
+        print type(e), str(e)
+
+    self.status = Video.STATUS_UPLOADED
+    self.save()
 
 class Tag(BaseModel):
   name = models.CharField(max_length=100, db_index=True, unique=True)

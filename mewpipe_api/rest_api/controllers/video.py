@@ -1,5 +1,4 @@
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.parsers import JSONParser
 from rest_framework import generics
 from rest_framework import parsers
 from rest_framework import filters
@@ -102,7 +101,7 @@ class ShareController(View):
     if video is None:
       return JsonResponse({}, status=404)
 
-    data = JSONParser().parse(request)
+    data = parsers.JSONParser().parse(request)
     serializer = ShareSerializer(data=data)
 
     if not serializer.is_valid():
@@ -126,9 +125,15 @@ class UploadVideoController(APIView):
     if video is None:
       return JsonResponse({}, status = 404)
 
-    with open('/tmp/'+uid, 'wb+') as videoFile:
-      print request.data
-      for chunk in request.data['file'].chunks():
-        videoFile.write(chunk)
+    video.status = Video.STATUS_UPLOADING
+    video.save()
+
+    file = request.data.get('file')
+    if file is None:
+      return JsonResponse({"file" : "Field Required"}, status=400)
+
+
+    video.writeOnDisk(file)
+
 
     return JsonResponse({})

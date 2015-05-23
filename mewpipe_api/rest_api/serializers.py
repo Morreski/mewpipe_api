@@ -27,6 +27,9 @@ class ShareSerializer(serializers.Serializer):
   dest_addresses = serializers.ListField(child=serializers.EmailField())
   video_link     = HtmlCleanField()
 
+class UploadSerializer(serializers.Serializer):
+  file = serializers.FileField(use_url=False)
+
 class VideoSerializer(serializers.ModelSerializer):
   title = HtmlCleanField(max_length=40)
   description = HtmlCleanField(required=False)
