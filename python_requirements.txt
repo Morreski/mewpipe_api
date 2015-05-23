@@ -5,3 +5,5 @@ django-filter
 mySQL
 pyyaml
 python-social-auth
+python-openid
+python-oauth2
