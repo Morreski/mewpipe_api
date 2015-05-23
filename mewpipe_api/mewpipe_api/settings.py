@@ -46,7 +46,7 @@ INSTALLED_APPS = (
     'rest_framework',
 
     'rest_api',
-    'social_auth',
+    'social.apps.django_app.default',
 )
 
 MIDDLEWARE_CLASSES = (
