@@ -13,6 +13,9 @@ VIDEO_PAGINATION_LIMIT = 25
 
 UPLOAD_DIR = "." #File upload destination
 
+
+VIDEO_SIZE_LIMIT = 524288000 #Video max file size (bytes)
+
 VIEW_TIMEOUT = 60 #Decide interval between two view incrementation
 VIEW_TTL = 24 #hours, View time to live
 

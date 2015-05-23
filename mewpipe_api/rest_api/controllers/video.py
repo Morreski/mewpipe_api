@@ -125,6 +125,9 @@ class UploadVideoController(APIView):
     if video is None:
       return JsonResponse({}, status = 404)
 
+    if video.status != Video.STATUS_NEW:
+      return JsonResponse({}, status = 404)
+
     video.status = Video.STATUS_UPLOADING
     video.save()
 
@@ -132,8 +135,9 @@ class UploadVideoController(APIView):
     if file is None:
       return JsonResponse({"file" : "Field Required"}, status=400)
 
+    if file._size > settings.VIDEO_SIZE_LIMIT:
+      return JsonResponse({"file" : "Video size too large"}, status=413)
 
     video.writeOnDisk(file)
-
 
     return JsonResponse({})
