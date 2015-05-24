@@ -11,6 +11,7 @@ class UserAccountSerializer(serializers.ModelSerializer):
   birth_date  = serializers.DateTimeField()
   is_active   = serializers.BooleanField(read_only=True)
 
+
 class TagSerializer(serializers.ModelSerializer):
   videos = serializers.SlugRelatedField(
       slug_field = 'uid',
@@ -23,13 +24,12 @@ class TagSerializer(serializers.ModelSerializer):
     model = Tag
     fields = Tag.serialized
 
+
 class ShareSerializer(serializers.Serializer):
   sender_address = serializers.EmailField()
   dest_addresses = serializers.ListField(child=serializers.EmailField())
   video_link     = HtmlCleanField()
 
-class UploadSerializer(serializers.Serializer):
-  file = serializers.FileField(use_url=False)
 
 class VideoSerializer(serializers.ModelSerializer):
   title = HtmlCleanField(max_length=40)
@@ -44,3 +44,4 @@ class VideoSerializer(serializers.ModelSerializer):
     model = Video
     fields = Video.serialized
     depth = 1
+

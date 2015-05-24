@@ -1,9 +1,13 @@
-from django.views.decorators.csrf import csrf_exempt
 from rest_framework import generics
 from rest_framework import parsers
 from rest_framework import filters
 from rest_framework.views import APIView
+
+from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
+from django.http import StreamingHttpResponse
+from django.core.files import File
+
 from rest_api.shortcuts import JsonResponse, get_by_uid, normalize_query
 from rest_api.models import Video, Tag, VideoTag
 from rest_api.serializers import VideoSerializer, ShareSerializer
@@ -141,3 +145,27 @@ class UploadVideoController(APIView):
     video.writeOnDisk(file)
 
     return JsonResponse({})
+
+class DownloadVideoController(APIView):
+
+  def get(self, request, *args, **kwargs):
+    video_format = request.GET.get('video_format', "mp4")
+
+    if video_format not in settings.SUPPORTED_VIDEO_FORMATS:
+      return StreamingHttpResponse({"Video Format Error" : settings.SUPPORTED_VIDEO_FORMATS }, status=400)
+
+    uid = kwargs['uid']
+    video = get_by_uid(Video, uid)
+
+    if video is None:
+      return StreamingHttpResponse({}, status=404)
+
+    if video.status != Video.STATUS_READY:
+      return StreamingHttpResponse({}, status=403)
+
+    file = video.get_file(video_format)
+    wrapper = File(file)
+    response =  StreamingHttpResponse(wrapper, )
+    response['Content-Type'] = "video/{0}".format(video_format)
+    response['Content-Disposition'] = 'inline; filename="{0}.{1}"'.format(uid, video_format)
+    return response
