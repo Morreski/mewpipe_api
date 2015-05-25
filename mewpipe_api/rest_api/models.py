@@ -31,22 +31,22 @@ class TemporaryUser(User):
 class CustomUserManager(BaseUserManager):
   use_in_migrations = True
 
-  def _create_user(self, fname, lname, birth_date, email, is_staff, is_superuser, **extra_fields):
+  def _create_user(self, fname, lname, email, username, birth_date, **extra_fields):
     email = self.normalize_email(email)
-    user = self.model(first_name=fname, last_name=lname, birth_date=birth_date, email=email, is_staff=is_staff, is_superuser=is_superuser, **extra_fields)
+    user = self.model(first_name=fname, last_name=lname, email=email, username=username, birth_date=birth_date, **extra_fields)
     user.save(using=self._db)
     return user
 
-  def create_user(self, fname, lname, birth_date, email=None, **extra_fields):
-    return self._create_user(fname, lname, birth_date, email, False, False,**extra_fields)
+  def create_user(self, fname='None', lname='None', email='None', username='None', birth_date=None, **extra_fields):
+    return self._create_user(fname, lname, email, username, birth_date,**extra_fields)
 
 class UserAccount(User):
   first_name  = models.CharField(max_length = 100)
   last_name   = models.CharField(max_length = 100)
   email       = models.CharField(max_length = 100)
   username    = models.CharField(max_length = 100)
-  birth_date  = models.DateTimeField()
-  last_login  = models.DateTimeField(blank=True)
+  birth_date  = models.DateTimeField(null=True)
+  last_login  = models.DateTimeField(null=True)
   is_active   = models.BooleanField(default=True)
 
   objects = CustomUserManager()

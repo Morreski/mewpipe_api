@@ -1,4 +1,5 @@
 from .settings_local import *
+from social_config import *
 
 """
 Django settings for mewpipe_api project.
@@ -63,11 +64,14 @@ MIDDLEWARE_CLASSES = (
 )
 
 AUTHENTICATION_BACKENDS = (
+    'social.backends.facebook.FacebookOAuth2',
+    'social.backends.google.GoogleOAuth2',
+    'social.backends.twitter.TwitterOAuth',
     'django.contrib.auth.backends.ModelBackend',
 )
 
 LOGIN_URL           = '/login/'
-LOGIN_REDIRECT_URL  = '/index/'
+LOGIN_REDIRECT_URL  = '/login-success/'
 LOGIN_ERROR_URL     = '/login-error/'
 
 SOCIAL_AUTH_USER_MODEL = 'rest_api.UserAccount'
@@ -87,6 +91,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social.apps.django_app.context_processors.backends',
+                'social.apps.django_app.context_processors.login_redirect',
             ],
         },
     },
