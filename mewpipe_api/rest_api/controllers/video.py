@@ -5,8 +5,8 @@ from rest_framework.views import APIView
 
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
-from django.http import StreamingHttpResponse
-from django.core.files import File
+from django.http import HttpResponse
+#from django.core.files import File
 
 from rest_api.shortcuts import JsonResponse, get_by_uid, normalize_query
 from rest_api.models import Video, Tag, VideoTag
@@ -152,20 +152,22 @@ class DownloadVideoController(APIView):
     video_format = request.GET.get('video_format', "mp4")
 
     if video_format not in settings.SUPPORTED_VIDEO_FORMATS:
-      return StreamingHttpResponse({"Video Format Error" : settings.SUPPORTED_VIDEO_FORMATS }, status=400)
+      return HttpResponse({"Video Format Error" : settings.SUPPORTED_VIDEO_FORMATS }, status=400)
 
     uid = kwargs['uid']
     video = get_by_uid(Video, uid)
 
     if video is None:
-      return StreamingHttpResponse({}, status=404)
+      return HttpResponse({}, status=404)
 
     if video.status != Video.STATUS_READY:
-      return StreamingHttpResponse({}, status=403)
+      return HttpResponse({}, status=403)
 
-    file = video.get_file(video_format)
-    wrapper = File(file)
-    response =  StreamingHttpResponse(wrapper, )
+    filename = video.get_fileName(video_format)
+#    wrapper = File(file)
+#    response =  StreamingHttpResponse(wrapper, )
+    response = HttpResponse()
     response['Content-Type'] = "video/{0}".format(video_format)
     response['Content-Disposition'] = 'inline; filename="{0}.{1}"'.format(uid, video_format)
+    response['X-Accel-Redirect'] = "/videos/{filename}".format(filename=filename)
     return response

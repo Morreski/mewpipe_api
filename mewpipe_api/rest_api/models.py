@@ -104,11 +104,8 @@ class Video(BaseModel):
     self.total_share_count += len(dest_list)
     self.save()
 
-  def get_file(self, video_format):
-    path = os.path.join(settings.UPLOAD_DIR, "videos", str(self.uid) + "." + video_format)
-    f = open(path)
-    return f
-
+  def get_fileName(self, video_format):
+    return str(self.uid) + "." + video_format
 
   @property
   def views_statistics(self):
