@@ -92,7 +92,7 @@ class Video(BaseModel):
   status = models.IntegerField(default=0, choices=STATUS_CHOICES)
 
   serialized = BaseModel.serialized + (
-      'title', 'author', 'tags', 'description', 'status', 'views_statistics', 'shares_statistics',
+      'title', 'author', 'tags', 'description', 'status', 'views_statistics', 'shares_statistics', 'file_urls',
   )
 
   search_indexes = ['title', 'description', 'tag__name']
@@ -135,6 +135,16 @@ class Video(BaseModel):
     shares["monthly"] = shares["total"] - self.monthly_share_count
     shares["yearly"] = shares["total"] - self.yearly_share_count
     return shares
+
+  @property
+  def file_urls(self):
+    domain_name = settings.DOMAIN_NAME
+    return [
+        {
+          "type" : "video/mp4",
+          "src"  : "http://{domain_name}/api/videos/{uid}/download?video_format=mp4".format(domain_name=domain_name, uid=str(self.uid))
+        }
+    ]
 
   def writeOnDisk(self, file):
 
