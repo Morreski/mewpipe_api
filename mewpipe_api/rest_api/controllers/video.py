@@ -6,7 +6,6 @@ from rest_framework.views import APIView
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.http import HttpResponse
-#from django.core.files import File
 
 from rest_api.shortcuts import JsonResponse, get_by_uid, normalize_query
 from rest_api.models import Video, Tag, VideoTag
@@ -164,8 +163,6 @@ class DownloadVideoController(APIView):
       return HttpResponse({}, status=403)
 
     filename = video.get_fileName(video_format)
-#    wrapper = File(file)
-#    response =  StreamingHttpResponse(wrapper, )
     response = HttpResponse()
     response['Content-Type'] = "video/{0}".format(video_format)
     response['Content-Disposition'] = 'inline; filename="{0}.{1}"'.format(uid, video_format)
