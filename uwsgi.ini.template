@@ -1,0 +1,17 @@
+[uwsgi]
+
+chdir=/home/enguerrand/Projects/mewpipe/mewpipe_api/
+http=:8000
+module=mewpipe_api.wsgi:application
+
+master=True
+
+pidfile=/home/enguerrand/Projects/mewpipe/mewpipe.pid
+vacuum=True
+
+home=/home/enguerrand/.virtualenvs/mewpipe
+daemonize=/home/enguerrand/Projects/mewpipe/logs/wsgi.log
+
+socket=/tmp/uwsgi.sock
+
+env = DJANGO_SETTINGS_MODULE=mewpipe_api.settings
