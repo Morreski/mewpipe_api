@@ -19,4 +19,5 @@ from django.conf.urls import include, url
 urlpatterns = [
     #url(r'^admin/', include(admin.site.urls)),
     url(r'^api/', include('rest_api.urls')),
+    url('', include('social.apps.django_app.urls', namespace='social')),
 ]
