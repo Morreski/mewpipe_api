@@ -17,7 +17,8 @@ from django.conf.urls import include, url
 #from django.contrib import admin
 
 urlpatterns = [
-    #url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', include(admin.site.urls)),
     url(r'^api/', include('rest_api.urls')),
-    url('', include('social.apps.django_app.urls', namespace='social')),
+    (r'^rest-auth/', include('rest_auth.urls')),
+    (r'^rest-auth/registration/', include('rest_auth.registration.urls'))
 ]

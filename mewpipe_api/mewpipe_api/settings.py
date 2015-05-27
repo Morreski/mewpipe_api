@@ -35,6 +35,7 @@ REST_FRAMEWORK = {
 # Application definition
 
 INSTALLED_APPS = (
+    'django.contrib.sites',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -44,10 +45,19 @@ INSTALLED_APPS = (
 
     #External Libs
     'django_extensions',
+
     'rest_framework',
+    'rest_framework.authtoken',
+    'rest_auth',
+
+    'allauth',
+    'allauth.account',
+    'rest_auth.registration',
+
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.facebook',
 
     'rest_api',
-    'social.apps.django_app.default',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -64,17 +74,8 @@ MIDDLEWARE_CLASSES = (
 )
 
 AUTHENTICATION_BACKENDS = (
-    'social.backends.facebook.FacebookOAuth2',
-    'social.backends.google.GoogleOAuth2',
-    'social.backends.twitter.TwitterOAuth',
     'django.contrib.auth.backends.ModelBackend',
 )
-
-LOGIN_URL           = '/login/'
-LOGIN_REDIRECT_URL  = '/login-success/'
-LOGIN_ERROR_URL     = '/login-error/'
-
-SOCIAL_AUTH_USER_MODEL = 'rest_api.UserAccount'
 
 ROOT_URLCONF = 'mewpipe_api.urls'
 
@@ -91,8 +92,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'social.apps.django_app.context_processors.backends',
-                'social.apps.django_app.context_processors.login_redirect',
+                'allauth.socialaccount.context_processors.socialaccount',
             ],
         },
     },
