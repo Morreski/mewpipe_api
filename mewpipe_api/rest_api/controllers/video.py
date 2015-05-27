@@ -8,7 +8,7 @@ from django.conf import settings
 from django.http import HttpResponse
 
 from rest_api.shortcuts import JsonResponse, get_by_uid, normalize_query
-from rest_api.models import Video, Tag, VideoTag
+from rest_api.models import Video, Tag, VideoTag, User
 from rest_api.serializers import VideoSerializer, ShareSerializer
 from rest_api.paginators import VideoPaginator
 
@@ -161,6 +161,10 @@ class DownloadVideoController(APIView):
 
     if video.status != Video.STATUS_READY:
       return HttpResponse({}, status=403)
+
+    ip_address = request.META['REMOTE_ADDR']
+    temp_user = User.getUser(ip_address=ip_address)
+    temp_user.watch(video)
 
     filename = video.get_fileName(video_format)
     response = HttpResponse()

@@ -41,8 +41,15 @@ class User(BaseModel):
     view, created = self.view_set.get_or_create(video=video)
     view.update()
 
+  @staticmethod
+  def getUser(**kwargs):
+    ip_address = kwargs.get('ip_address')
+    if ip_address:
+      return TemporaryUser.objects.get_or_create(ip=ip_address)[0]
+
+
 class TemporaryUser(User):
-  ip = models.GenericIPAddressField(unpack_ipv4=True)
+  ip = models.GenericIPAddressField(unpack_ipv4=True, unique=True)
 
 class CustomUserManager(BaseUserManager):
   use_in_migrations = True
