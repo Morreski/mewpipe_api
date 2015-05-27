@@ -1,3 +1,4 @@
 libmysqlclient-dev
 python2.7
 pip
+nginx

@@ -7,6 +7,22 @@ from django.core.mail import send_mail
 import os, uuid
 # Create your models here.
 
+class VideoManager(models.Manager):
+  def get_queryset(self):
+    qs = models.Manager.get_queryset(self)
+    return qs.annotate(
+        daily_share = models.F("total_share_count") - models.F("daily_share_count"),
+        weekly_share = models.F("total_share_count") - models.F("weekly_share_count"),
+        monthly_share = models.F("total_share_count") - models.F("monthly_share_count"),
+        yearly_share = models.F("total_share_count") - models.F("yearly_share_count"),
+
+        daily_view = models.F("total_view_count") - models.F("daily_view_count"),
+        weekly_view = models.F("total_view_count") - models.F("weekly_view_count"),
+        monthly_view = models.F("total_view_count") - models.F("monthly_view_count"),
+        yearly_view = models.F("total_view_count") - models.F("yearly_view_count"),
+    )
+
+
 class BaseModel(models.Model):
   uid = models.UUIDField(default=uuid.uuid4, editable=False)
   creation_date = models.DateTimeField(auto_now_add=True)
@@ -55,6 +71,8 @@ class UserAccount(User):
 
 class Video(BaseModel):
 
+  objects = VideoManager()
+
   STATUS_NEW = 0
   STATUS_UPLOADING = 1
   STATUS_UPLOADED = 2
@@ -92,7 +110,7 @@ class Video(BaseModel):
   status = models.IntegerField(default=0, choices=STATUS_CHOICES)
 
   serialized = BaseModel.serialized + (
-      'title', 'author', 'tags', 'description', 'status', 'views_statistics', 'shares_statistics',
+      'title', 'author', 'tags', 'description', 'status', 'views_statistics', 'shares_statistics', 'file_urls',
   )
 
   search_indexes = ['title', 'description', 'tag__name']
@@ -104,11 +122,8 @@ class Video(BaseModel):
     self.total_share_count += len(dest_list)
     self.save()
 
-  def get_file(self, video_format):
-    path = os.path.join(settings.UPLOAD_DIR, "videos", str(self.uid) + "." + video_format)
-    f = open(path)
-    return f
-
+  def get_fileName(self, video_format):
+    return str(self.uid) + "." + video_format
 
   @property
   def views_statistics(self):
@@ -135,6 +150,16 @@ class Video(BaseModel):
     shares["monthly"] = shares["total"] - self.monthly_share_count
     shares["yearly"] = shares["total"] - self.yearly_share_count
     return shares
+
+  @property
+  def file_urls(self):
+    domain_name = settings.DOMAIN_NAME
+    return [
+        {
+          "type" : "video/mp4",
+          "src"  : "http://{domain_name}/api/videos/{uid}/download?video_format=mp4".format(domain_name=domain_name, uid=str(self.uid))
+        }
+    ]
 
   def writeOnDisk(self, file):
 

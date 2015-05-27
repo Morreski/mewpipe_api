@@ -5,8 +5,7 @@ from rest_framework.views import APIView
 
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
-from django.http import StreamingHttpResponse
-from django.core.files import File
+from django.http import HttpResponse
 
 from rest_api.shortcuts import JsonResponse, get_by_uid, normalize_query
 from rest_api.models import Video, Tag, VideoTag
@@ -28,16 +27,16 @@ class VideoControllerGeneral(generics.ListCreateAPIView):
       'creation_date',
       'edition_date',
       'total_view_count',
-      'daily_view_count',
-      'weekly_view_count',
-      'monthly_view_count',
-      'yearly_view_count',
+      'daily_view',
+      'weekly_view',
+      'monthly_view',
+      'yearly_view',
 
       'total_share_count',
-      'daily_share_count',
-      'monthly_share_count',
-      'weekly_share_count',
-      'yearly_share_count',
+      'daily_share',
+      'monthly_share',
+      'weekly_share',
+      'yearly_share',
   )
   ordering_fields = filter_fields
   queryset = Video.objects.all()
@@ -152,20 +151,20 @@ class DownloadVideoController(APIView):
     video_format = request.GET.get('video_format', "mp4")
 
     if video_format not in settings.SUPPORTED_VIDEO_FORMATS:
-      return StreamingHttpResponse({"Video Format Error" : settings.SUPPORTED_VIDEO_FORMATS }, status=400)
+      return HttpResponse({"Video Format Error" : settings.SUPPORTED_VIDEO_FORMATS }, status=400)
 
     uid = kwargs['uid']
     video = get_by_uid(Video, uid)
 
     if video is None:
-      return StreamingHttpResponse({}, status=404)
+      return HttpResponse({}, status=404)
 
     if video.status != Video.STATUS_READY:
-      return StreamingHttpResponse({}, status=403)
+      return HttpResponse({}, status=403)
 
-    file = video.get_file(video_format)
-    wrapper = File(file)
-    response =  StreamingHttpResponse(wrapper, )
+    filename = video.get_fileName(video_format)
+    response = HttpResponse()
     response['Content-Type'] = "video/{0}".format(video_format)
     response['Content-Disposition'] = 'inline; filename="{0}.{1}"'.format(uid, video_format)
+    response['X-Accel-Redirect'] = "/videos/{filename}".format(filename=filename)
     return response
