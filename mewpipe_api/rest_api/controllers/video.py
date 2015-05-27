@@ -11,6 +11,7 @@ from rest_api.shortcuts import JsonResponse, get_by_uid, normalize_query
 from rest_api.models import Video, Tag, VideoTag, User
 from rest_api.serializers import VideoSerializer, ShareSerializer
 from rest_api.paginators import VideoPaginator
+from rest_api.videoconverter import video_ready
 
 from django.views.generic import View
 import itertools
@@ -129,19 +130,23 @@ class UploadVideoController(APIView):
       return JsonResponse({}, status = 404)
 
     if video.status != Video.STATUS_NEW:
-      return JsonResponse({}, status = 404)
+      return JsonResponse({}, status = 403)
 
     video.status = Video.STATUS_UPLOADING
     video.save()
 
+    filename = request.FILES[request.FILES.keys()[0]].name #get only first file in request
+    ext = filename.strip().split('.')[-1]
     file = request.data.get('file')
+
     if file is None:
       return JsonResponse({"file" : "Field Required"}, status=400)
 
     if file._size > settings.VIDEO_SIZE_LIMIT:
       return JsonResponse({"file" : "Video size too large"}, status=413)
 
-    video.writeOnDisk(file)
+    video.writeOnDisk(file, ext)
+    video_ready.send(sender=self.__class__, video=video, ext=ext)
 
     return JsonResponse({})
 

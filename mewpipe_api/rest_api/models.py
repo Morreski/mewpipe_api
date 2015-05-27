@@ -168,9 +168,9 @@ class Video(BaseModel):
         }
     ]
 
-  def writeOnDisk(self, file):
+  def writeOnDisk(self, file, ext):
 
-    upload_path = os.path.join(settings.UPLOAD_DIR, 'pending_videos', str(self.uid))
+    upload_path = os.path.join(settings.UPLOAD_DIR, 'pending_videos', str(self.uid) + '.' + ext)
 
     if not os.path.exists(os.path.dirname(upload_path)):
         os.makedirs(os.path.dirname(upload_path))
