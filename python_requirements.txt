@@ -4,6 +4,5 @@ djangorestframework
 django-filter
 mySQL
 pyyaml
-python-social-auth
-python-openid
-python-oauth2
+django-rest-auth
+django-allauth
