@@ -27,16 +27,16 @@ class VideoControllerGeneral(generics.ListCreateAPIView):
       'creation_date',
       'edition_date',
       'total_view_count',
-      'daily_view_count',
-      'weekly_view_count',
-      'monthly_view_count',
-      'yearly_view_count',
+      'daily_view',
+      'weekly_view',
+      'monthly_view',
+      'yearly_view',
 
       'total_share_count',
-      'daily_share_count',
-      'monthly_share_count',
-      'weekly_share_count',
-      'yearly_share_count',
+      'daily_share',
+      'monthly_share',
+      'weekly_share',
+      'yearly_share',
   )
   ordering_fields = filter_fields
   queryset = Video.objects.all()

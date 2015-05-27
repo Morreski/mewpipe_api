@@ -7,6 +7,22 @@ from django.core.mail import send_mail
 import os, uuid
 # Create your models here.
 
+class VideoManager(models.Manager):
+  def get_queryset(self):
+    qs = models.Manager.get_queryset(self)
+    return qs.annotate(
+        daily_share = models.F("total_share_count") - models.F("daily_share_count"),
+        weekly_share = models.F("total_share_count") - models.F("weekly_share_count"),
+        monthly_share = models.F("total_share_count") - models.F("monthly_share_count"),
+        yearly_share = models.F("total_share_count") - models.F("yearly_share_count"),
+
+        daily_view = models.F("total_view_count") - models.F("daily_view_count"),
+        weekly_view = models.F("total_view_count") - models.F("weekly_view_count"),
+        monthly_view = models.F("total_view_count") - models.F("monthly_view_count"),
+        yearly_view = models.F("total_view_count") - models.F("yearly_view_count"),
+    )
+
+
 class BaseModel(models.Model):
   uid = models.UUIDField(default=uuid.uuid4, editable=False)
   creation_date = models.DateTimeField(auto_now_add=True)
@@ -54,6 +70,8 @@ class UserAccount(User):
   serialized = ('first_name', 'last_name', 'email', 'username', 'birth_date', 'is_active')
 
 class Video(BaseModel):
+
+  objects = VideoManager()
 
   STATUS_NEW = 0
   STATUS_UPLOADING = 1
