@@ -76,6 +76,7 @@ class UserAccount(User):
 
   serialized = ('first_name', 'last_name', 'email', 'username', 'birth_date', 'is_active')
 
+
 class Video(BaseModel):
 
   objects = VideoManager()
@@ -119,7 +120,7 @@ class Video(BaseModel):
   status = models.IntegerField(default=0, choices=STATUS_CHOICES)
 
   serialized = BaseModel.serialized + (
-      'title', 'author', 'tags', 'description', 'status', 'views_statistics', 'shares_statistics', 'file_urls', 'thumbnail_url'
+      'title', 'author', 'tags', 'description', 'status', 'views_statistics', 'shares_statistics', 'file_urls', 'thumbnail_url', 'thumbnail_frame',
   )
 
   search_indexes = ['title', 'description', 'tag__name']

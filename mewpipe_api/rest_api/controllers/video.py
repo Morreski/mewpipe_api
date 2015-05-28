@@ -155,6 +155,7 @@ class ThumbnailVideoController(APIView):
 
   def get(self, request, *args, **kwargs):
     uid = kwargs['uid']
+    time = request.data.get('t')
     video = get_by_uid(Video, uid)
 
     if video is None:
@@ -163,10 +164,12 @@ class ThumbnailVideoController(APIView):
     if video.status != Video.STATUS_READY:
       return HttpResponse({}, status=403)
 
+    if not time:
+      time = video.thumbnail_frame
 
     filename = "{uid}_{number}.jpg".format(
       uid = str(video.uid),
-      number = video.thumbnail_frame + 1 #+1 cause of ffmpeg output
+      number = time + 1 #+1 cause of ffmpeg output
     )
 
     response = HttpResponse()
