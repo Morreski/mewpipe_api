@@ -10,7 +10,7 @@ def convert(video, ext, **kwargs):
   name = str(video.uid)
   input_path = os.path.join(settings.UPLOAD_DIR, "pending_videos", name + '.' + ext)
   output_path = os.path.join(settings.UPLOAD_DIR, "videos", name)
-  thumbnail_path = os.path.join(settings.UPLOAD_DIR, "thumbnails", name + "_%d.png")
+  thumbnail_path = os.path.join(settings.UPLOAD_DIR, "thumbnails", name + "_%d.jpg")
 
 
   if not os.path.exists(os.path.dirname(output_path)):
@@ -18,7 +18,7 @@ def convert(video, ext, **kwargs):
   if not os.path.exists(os.path.dirname(thumbnail_path)):
       os.makedirs(os.path.dirname(thumbnail_path))
 
-  thumb_command = "ffmpeg -i {input} -vf fps=1 {output}".format(
+  thumb_command = "ffmpeg -i {input} -vf fps=1 {output} -loglevel quiet".format(
     input = input_path,
     output = thumbnail_path
   )

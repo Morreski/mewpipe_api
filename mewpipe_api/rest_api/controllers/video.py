@@ -164,13 +164,13 @@ class ThumbnailVideoController(APIView):
       return HttpResponse({}, status=403)
 
 
-    filename = "{uid}_{number}.png".format(
+    filename = "{uid}_{number}.jpg".format(
       uid = str(video.uid),
       number = video.thumbnail_frame + 1 #+1 cause of ffmpeg output
     )
 
     response = HttpResponse()
-    response['Content-Type'] = "image/png"
+    response['Content-Type'] = "image/jpg"
     response['Content-Disposition'] = 'inline; filename="{0}"'.format(filename)
     response['X-Accel-Redirect'] = "/thumbnails/{filename}".format(filename=filename)
     return response
