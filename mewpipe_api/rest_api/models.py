@@ -96,6 +96,8 @@ class Video(BaseModel):
   description = models.TextField(blank=True)
   author = models.ForeignKey(User, null = True) #TODO: Remove null=true
 
+  thumbnail_frame = models.IntegerField(default=0)
+
   tags = models.ManyToManyField("Tag", through="VideoTag")
 
   total_view_count = models.IntegerField(default = 0)
