@@ -75,7 +75,7 @@ class VideoControllerGeneral(generics.ListCreateAPIView):
     generics.ListCreateAPIView.__init__(self, *args, **kwargs)
 
   def post(self, request, *args, **kwargs):
-    for tagName in request.data.get('tags', []):
+    for tagName in request.data.get('tags', [])[:10]:
       self.tagNames.append(tagName)
     return generics.ListCreateAPIView.post(self, request, *args, **kwargs)
 
