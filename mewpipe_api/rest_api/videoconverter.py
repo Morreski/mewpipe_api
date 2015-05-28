@@ -10,9 +10,19 @@ def convert(video, ext, **kwargs):
   name = str(video.uid)
   input_path = os.path.join(settings.UPLOAD_DIR, "pending_videos", name + '.' + ext)
   output_path = os.path.join(settings.UPLOAD_DIR, "videos", name)
+  thumbnail_path = os.path.join(settings.UPLOAD_DIR, "thumbnails", name + "%d.png")
+
 
   if not os.path.exists(os.path.dirname(output_path)):
       os.makedirs(os.path.dirname(output_path))
+  if not os.path.exists(os.path.dirname(thumbnail_path)):
+      os.makedirs(os.path.dirname(thumbnail_path))
+
+  thumb_command = "ffmpeg -i {input} -vf fps=1 {output}".format(
+    input = input_path,
+    output = thumbnail_path
+  )
+  Popen(thumb_command, shell=True)
 
   for extension in settings.SUPPORTED_VIDEO_FORMATS:
     command = "ffmpeg -y -i {input} {output} -loglevel quiet".format(
