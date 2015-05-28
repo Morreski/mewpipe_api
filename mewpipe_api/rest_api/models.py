@@ -119,7 +119,7 @@ class Video(BaseModel):
   status = models.IntegerField(default=0, choices=STATUS_CHOICES)
 
   serialized = BaseModel.serialized + (
-      'title', 'author', 'tags', 'description', 'status', 'views_statistics', 'shares_statistics', 'file_urls',
+      'title', 'author', 'tags', 'description', 'status', 'views_statistics', 'shares_statistics', 'file_urls', 'thumbnail_url'
   )
 
   search_indexes = ['title', 'description', 'tag__name']
@@ -163,10 +163,23 @@ class Video(BaseModel):
   @property
   def file_urls(self):
     domain_name = settings.DOMAIN_NAME
+
+    output = []
+    for f in settings.SUPPORTED_VIDEO_FORMATS:
+      output.append({
+        "type" : "video/{fmt}".format(fmt=f),
+        "src"  : "http://{domain_name}/api/videos/{uid}/download?video_format={fmt}".format(domain_name=domain_name, uid=str(self.uid), fmt=f)
+      })
+
+    return output
+
+  @property
+  def thumbnail_url(self):
+    domain_name = settings.DOMAIN_NAME
     return [
         {
-          "type" : "video/mp4",
-          "src"  : "http://{domain_name}/api/videos/{uid}/download?video_format=mp4".format(domain_name=domain_name, uid=str(self.uid))
+          "type" : "image/png",
+          "src"  : "http://{domain_name}/api/videos/{uid}/thumbnail".format(domain_name=domain_name, uid=str(self.uid))
         }
     ]
 

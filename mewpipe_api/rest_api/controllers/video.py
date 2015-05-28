@@ -168,8 +168,10 @@ class ThumbnailVideoController(APIView):
       uid = str(video.uid),
       number = video.thumbnail_frame + 1 #+1 cause of ffmpeg output
     )
-    print filename
+
     response = HttpResponse()
+    response['Content-Type'] = "image/png"
+    response['Content-Disposition'] = 'inline; filename="{0}"'.format(filename)
     response['X-Accel-Redirect'] = "/thumbnails/{filename}".format(filename=filename)
     return response
 

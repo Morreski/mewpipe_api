@@ -40,6 +40,7 @@ class VideoSerializer(serializers.ModelSerializer):
   views_statistics = serializers.ReadOnlyField()
   shares_statistics = serializers.ReadOnlyField()
   file_urls = serializers.ReadOnlyField()
+  thumbnail_url = serializers.ReadOnlyField()
 
   class Meta:
     model = Video
