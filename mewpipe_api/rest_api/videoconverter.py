@@ -10,7 +10,7 @@ def convert(video, ext, **kwargs):
   name = str(video.uid)
   input_path = os.path.join(settings.UPLOAD_DIR, "pending_videos", name + '.' + ext)
   output_path = os.path.join(settings.UPLOAD_DIR, "videos", name)
-  thumbnail_path = os.path.join(settings.UPLOAD_DIR, "thumbnails", name + "%d.png")
+  thumbnail_path = os.path.join(settings.UPLOAD_DIR, "thumbnails", name + "_%d.png")
 
 
   if not os.path.exists(os.path.dirname(output_path)):

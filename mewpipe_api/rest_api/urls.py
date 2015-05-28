@@ -8,6 +8,7 @@ urlpatterns = [
     url(r'^videos/(?P<uid>([a-f]|[0-9]){8}-([a-f]|[0-9]){4}-([a-f]|[0-9]){4}-([a-f]|[0-9]){4}-([a-f]|[0-9]){12})/share$', video.ShareController.as_view()),
     url(r'^videos/(?P<uid>([a-f]|[0-9]){8}-([a-f]|[0-9]){4}-([a-f]|[0-9]){4}-([a-f]|[0-9]){4}-([a-f]|[0-9]){12})/upload$', video.UploadVideoController.as_view()),
     url(r'^videos/(?P<uid>([a-f]|[0-9]){8}-([a-f]|[0-9]){4}-([a-f]|[0-9]){4}-([a-f]|[0-9]){4}-([a-f]|[0-9]){12})/download$', video.DownloadVideoController.as_view()),
+    url(r'^videos/(?P<uid>([a-f]|[0-9]){8}-([a-f]|[0-9]){4}-([a-f]|[0-9]){4}-([a-f]|[0-9]){4}-([a-f]|[0-9]){12})/thumbnail$', video.ThumbnailVideoController.as_view()),
 
     url(r'^tags/$', tag.TagGeneral.as_view()),
     url(r'^tags/(?P<uid>([a-f]|[0-9]){8}-([a-f]|[0-9]){4}-([a-f]|[0-9]){4}-([a-f]|[0-9]){4}-([a-f]|[0-9]){12})$', tag.TagSpecific.as_view())

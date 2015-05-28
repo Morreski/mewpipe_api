@@ -150,6 +150,30 @@ class UploadVideoController(APIView):
 
     return JsonResponse({})
 
+
+class ThumbnailVideoController(APIView):
+
+  def get(self, request, *args, **kwargs):
+    uid = kwargs['uid']
+    video = get_by_uid(Video, uid)
+
+    if video is None:
+      return HttpResponse({}, status=404)
+
+    if video.status != Video.STATUS_READY:
+      return HttpResponse({}, status=403)
+
+
+    filename = "{uid}_{number}.png".format(
+      uid = str(video.uid),
+      number = video.thumbnail_frame + 1 #+1 cause of ffmpeg output
+    )
+    print filename
+    response = HttpResponse()
+    response['X-Accel-Redirect'] = "/thumbnails/{filename}".format(filename=filename)
+    return response
+
+
 class DownloadVideoController(APIView):
 
   def get(self, request, *args, **kwargs):
