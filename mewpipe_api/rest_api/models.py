@@ -176,12 +176,7 @@ class Video(BaseModel):
   @property
   def thumbnail_url(self):
     domain_name = settings.DOMAIN_NAME
-    return [
-        {
-          "type" : "image/png",
-          "src"  : "http://{domain_name}/api/videos/{uid}/thumbnail".format(domain_name=domain_name, uid=str(self.uid))
-        }
-    ]
+    return "http://{domain_name}/api/videos/{uid}/thumbnail".format(domain_name=domain_name, uid=str(self.uid))
 
   def writeOnDisk(self, file, ext):
 
