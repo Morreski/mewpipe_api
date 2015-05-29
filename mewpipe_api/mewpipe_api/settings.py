@@ -1,5 +1,5 @@
 from .settings_local import *
-from social_config import *
+#from social_config import *
 
 """
 Django settings for mewpipe_api project.
