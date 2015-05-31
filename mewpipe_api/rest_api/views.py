@@ -1,3 +1,6 @@
 from django.shortcuts import render
+from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
+from rest_auth.registration.views import SocialLogin
 
-# Create your views here.
+class FacebookLogin(SocialLogin):
+    adapter_class = FacebookOAuth2Adapter
