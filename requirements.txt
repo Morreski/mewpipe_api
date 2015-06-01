@@ -2,4 +2,5 @@ libmysqlclient-dev
 python2.7
 pip
 nginx
-ffmpeg
+libav-tools
+libimage-exiftool-perl

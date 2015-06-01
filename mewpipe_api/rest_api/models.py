@@ -111,6 +111,7 @@ class Video(BaseModel):
   author = models.ForeignKey(User, null = True) #TODO: Remove null=true
 
   thumbnail_frame = models.IntegerField(default=0)
+  duration = models.IntegerField(default=0)
 
   tags = models.ManyToManyField("Tag", through="VideoTag")
 
@@ -134,7 +135,7 @@ class Video(BaseModel):
 
   serialized = BaseModel.serialized + (
       'title', 'author', 'tags', 'description', 'status', 'views_statistics', 'shares_statistics', 'file_urls', 'thumbnail_url', 'thumbnail_frame',
-      'privacy_policy',
+      'privacy_policy', 'duration',
   )
 
   search_indexes = ['title', 'description', 'tag__name']

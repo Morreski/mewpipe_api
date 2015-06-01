@@ -3,6 +3,7 @@ from rest_framework import parsers
 from rest_framework import filters
 from rest_framework.views import APIView
 
+from django.db.transaction import atomic
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.http import HttpResponse
@@ -135,6 +136,7 @@ class ShareController(View):
 class UploadVideoController(APIView):
   parsers = (parsers.FileUploadParser )
 
+  @atomic
   def post(self, request, *args, **kwargs):
     uid = kwargs['uid']
     video = get_by_uid(Video, uid)
