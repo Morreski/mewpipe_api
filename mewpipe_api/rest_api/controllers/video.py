@@ -169,7 +169,12 @@ class ThumbnailVideoController(APIView):
 
   def get(self, request, *args, **kwargs):
     uid = kwargs['uid']
-    time = request.data.get('t')
+
+    try:
+      time = int(self.request.GET.get('t'))
+    except:
+      time = 0
+
     video = get_by_uid(Video, uid)
 
     if video is None:
