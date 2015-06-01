@@ -18,14 +18,14 @@ def convert(video, ext, **kwargs):
   if not os.path.exists(os.path.dirname(thumbnail_path)):
       os.makedirs(os.path.dirname(thumbnail_path))
 
-  thumb_command = "ffmpeg -i {input} -vf fps=1 {output} -loglevel quiet".format(
+  thumb_command = "avconv -i {input} -vf fps=1 {output} -loglevel quiet".format(
     input = input_path,
     output = thumbnail_path
   )
   Popen(thumb_command, shell=True)
 
   for extension in settings.SUPPORTED_VIDEO_FORMATS:
-    command = "ffmpeg -y -i {input} {output} -loglevel quiet".format(
+    command = "avconv -y -i {input} -strict experimental {output} -loglevel quiet".format(
       input = input_path,
       output = output_path + "." + extension
     )
