@@ -82,6 +82,7 @@ class VideoControllerGeneral(generics.ListCreateAPIView):
   def perform_create(self, serializer):
     v = serializer.save()
     for tagName in self.tagNames:
+      tagName = tagName.replace(' ', '').lower()
       t, created = Tag.objects.get_or_create(name=tagName)
       VideoTag.objects.create(tag=t,video=v, tag_level=0)
 
@@ -92,6 +93,17 @@ class VideoControllerSpecific(generics.RetrieveUpdateDestroyAPIView):
   serializer_class = VideoSerializer
   lookup_field = 'uid'
 
+  def perform_update(self, serializer):
+    v = serializer.save()
+    tagNames = self.request.data.get("tags")
+    if tagNames is None:
+      return
+
+    VideoTag.objects.filter(video=v).delete()
+    for tagName in tagNames[:10]:
+      tagName = tagName.replace(' ', '').lower()
+      t, created = Tag.objects.get_or_create(name=tagName)
+      VideoTag.objects.create(tag=t,video=v, tag_level=0)
 
 class ShareController(View):
 
