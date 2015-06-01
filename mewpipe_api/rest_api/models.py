@@ -93,11 +93,25 @@ class Video(BaseModel):
     (STATUS_READY, "Ready"),
   )
 
+  PRIVACY_PUBLIC = 0
+  PRIVACY_PRIVATE_LINK = 1
+  PRIVACY_PRIVATE = 2
+
+  PRIVACY_CHOICES = (
+    (PRIVACY_PUBLIC, "Public"),
+    (PRIVACY_PRIVATE_LINK, "Private link"),
+    (PRIVACY_PRIVATE, "Private")
+  )
+
   title = models.CharField(max_length = 40, db_index=True)
   description = models.TextField(blank=True)
+
+  privacy_policy = models.IntegerField(default=0, choices=PRIVACY_CHOICES)
+
   author = models.ForeignKey(User, null = True) #TODO: Remove null=true
 
   thumbnail_frame = models.IntegerField(default=0)
+  duration = models.IntegerField(default=0)
 
   tags = models.ManyToManyField("Tag", through="VideoTag")
 
@@ -121,6 +135,7 @@ class Video(BaseModel):
 
   serialized = BaseModel.serialized + (
       'title', 'author', 'tags', 'description', 'status', 'views_statistics', 'shares_statistics', 'file_urls', 'thumbnail_url', 'thumbnail_frame',
+      'privacy_policy', 'duration',
   )
 
   search_indexes = ['title', 'description', 'tag__name']
@@ -200,7 +215,7 @@ class Tag(BaseModel):
   serialized = BaseModel.serialized + ('name', 'videos')
 
   def save(self, *args, **kwargs):
-    self.name = self.name.replace(' ', '')
+    self.name = self.name.replace(' ', '').lower()
     BaseModel.save(self, *args, **kwargs)
 
 class Mail(BaseModel):

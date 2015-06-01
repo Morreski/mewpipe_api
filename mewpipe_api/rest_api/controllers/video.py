@@ -3,6 +3,7 @@ from rest_framework import parsers
 from rest_framework import filters
 from rest_framework.views import APIView
 
+from django.db.transaction import atomic
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.http import HttpResponse
@@ -82,6 +83,7 @@ class VideoControllerGeneral(generics.ListCreateAPIView):
   def perform_create(self, serializer):
     v = serializer.save()
     for tagName in self.tagNames:
+      tagName = tagName.replace(' ', '').lower()
       t, created = Tag.objects.get_or_create(name=tagName)
       VideoTag.objects.create(tag=t,video=v, tag_level=0)
 
@@ -92,6 +94,17 @@ class VideoControllerSpecific(generics.RetrieveUpdateDestroyAPIView):
   serializer_class = VideoSerializer
   lookup_field = 'uid'
 
+  def perform_update(self, serializer):
+    v = serializer.save()
+    tagNames = self.request.data.get("tags")
+    if tagNames is None:
+      return
+
+    VideoTag.objects.filter(video=v).delete()
+    for tagName in tagNames[:10]:
+      tagName = tagName.replace(' ', '').lower()
+      t, created = Tag.objects.get_or_create(name=tagName)
+      VideoTag.objects.create(tag=t,video=v, tag_level=0)
 
 class ShareController(View):
 
@@ -123,6 +136,7 @@ class ShareController(View):
 class UploadVideoController(APIView):
   parsers = (parsers.FileUploadParser )
 
+  @atomic
   def post(self, request, *args, **kwargs):
     uid = kwargs['uid']
     video = get_by_uid(Video, uid)
@@ -155,7 +169,12 @@ class ThumbnailVideoController(APIView):
 
   def get(self, request, *args, **kwargs):
     uid = kwargs['uid']
-    time = request.data.get('t')
+
+    try:
+      time = int(self.request.GET.get('t'))
+    except:
+      time = 0
+
     video = get_by_uid(Video, uid)
 
     if video is None:

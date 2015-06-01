@@ -33,14 +33,15 @@ class ShareSerializer(serializers.Serializer):
 
 class VideoSerializer(serializers.ModelSerializer):
   title = HtmlCleanField(max_length=40)
-  description = HtmlCleanField(required=False)
-  tags = TagSerializer(many=True, read_only=True)
+  description = HtmlCleanField(required=False, allow_blank=True)
   status = serializers.ChoiceField(Video.STATUS_CHOICES, read_only=True)
 
+  tags = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name')
   views_statistics = serializers.ReadOnlyField()
   shares_statistics = serializers.ReadOnlyField()
   file_urls = serializers.ReadOnlyField()
   thumbnail_url = serializers.ReadOnlyField()
+  duration = serializers.IntegerField(read_only=True)
 
   class Meta:
     model = Video
