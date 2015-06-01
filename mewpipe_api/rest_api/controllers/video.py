@@ -194,7 +194,7 @@ class DownloadVideoController(APIView):
       return HttpResponse({}, status=404)
 
     if video.status != Video.STATUS_READY:
-      return HttpResponse({}, status=403)
+      return HttpResponse({}, status=400)
 
     ip_address = request.META['REMOTE_ADDR']
     temp_user = User.getUser(ip_address=ip_address)
