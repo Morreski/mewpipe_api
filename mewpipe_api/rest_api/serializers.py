@@ -41,7 +41,9 @@ class VideoSerializer(serializers.ModelSerializer):
   shares_statistics = serializers.ReadOnlyField()
   file_urls = serializers.ReadOnlyField()
   thumbnail_url = serializers.ReadOnlyField()
+  hr_duration = serializers.ReadOnlyField()
   duration = serializers.IntegerField(read_only=True)
+
 
   class Meta:
     model = Video

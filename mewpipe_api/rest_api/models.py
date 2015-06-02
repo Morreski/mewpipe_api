@@ -135,7 +135,7 @@ class Video(BaseModel):
 
   serialized = BaseModel.serialized + (
       'title', 'author', 'tags', 'description', 'status', 'views_statistics', 'shares_statistics', 'file_urls', 'thumbnail_url', 'thumbnail_frame',
-      'privacy_policy', 'duration',
+      'privacy_policy', 'duration', 'hr_duration',
   )
 
   search_indexes = ['title', 'description', 'tag__name']
@@ -164,6 +164,11 @@ class Video(BaseModel):
     views["monthly"] = views["total"] - self.monthly_view_count
     views["yearly"] = views["total"] - self.yearly_view_count
     return views
+
+  @property
+  def hr_duration(self):
+    m, s = divmod(self.duration, 60)
+    return "{0}:{1}".format(m, s)
 
   @property
   def shares_statistics(self):
