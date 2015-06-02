@@ -1,4 +1,5 @@
-from django.contrib.auth.models import BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
+from django.utils.translation import ugettext_lazy as _
 from django.db import models
 from django.db.models.aggregates import Sum
 from django.utils import timezone
@@ -52,27 +53,41 @@ class TemporaryUser(User):
   ip = models.GenericIPAddressField(unpack_ipv4=True, unique=True)
 
 class CustomUserManager(BaseUserManager):
-  use_in_migrations = True
+  def _create_user(self, username, email, fname, lname, password, is_staff, is_superuser, **extra_fields):
 
-  def _create_user(self, fname, lname, email, username, birth_date, **extra_fields):
+    now = timezone.now()
     email = self.normalize_email(email)
-    user = self.model(first_name=fname, last_name=lname, email=email, username=username, birth_date=birth_date, **extra_fields)
+    user = self.model(username=username,
+                      email=email,
+                      first_name=fname,
+                      last_name=lname,
+                      is_staff=is_staff, is_active=True,
+                      is_superuser=is_superuser, last_login=now,
+                      date_joined=now, **extra_fields)
+    user.set_password(password)
     user.save(using=self._db)
     return user
 
-  def create_user(self, fname='None', lname='None', email='None', username='None', birth_date=None, **extra_fields):
-    return self._create_user(fname, lname, email, username, birth_date,**extra_fields)
+  def create_user(self, username, email, fname, lname, password=None, **extra_fields):
+    return self._create_user(username, email, fname, lname, password, False, False, **extra_fields)
 
-class UserAccount(User):
-  first_name  = models.CharField(max_length = 100)
-  last_name   = models.CharField(max_length = 100)
-  email       = models.CharField(max_length = 100)
-  username    = models.CharField(max_length = 100)
-  birth_date  = models.DateTimeField(null=True)
-  last_login  = models.DateTimeField(null=True)
-  is_active   = models.BooleanField(default=True)
+  def create_superuser(self, username, email, fname, lname, password, **extra_fields):
+    return self._create_user(username, email, fname, lname, password, True, True, **extra_fields)
+
+  use_in_migrations = True
+
+class UserAccount(AbstractBaseUser, PermissionsMixin):
+  username    = models.CharField(_('Username'), max_length = 50, unique=True)
+  email       = models.EmailField(_('Email address'), max_length=254, unique=True)
+  first_name  = models.CharField(_('First name'), max_length=50, blank=True)
+  last_name   = models.CharField(_('Last name'), max_length=50, blank=True)
+  is_staff    = models.BooleanField(_('is staff'), default=False)
+  is_active   = models.BooleanField(_('is active'), default=True)
+  date_joined = models.DateTimeField(_('Join date'), default=timezone.now)
 
   objects = CustomUserManager()
+  USERNAME_FIELD = 'username'
+  REQUIRED_FIELDS = ['email']
 
   serialized = ('first_name', 'last_name', 'email', 'username', 'birth_date', 'is_active')
 

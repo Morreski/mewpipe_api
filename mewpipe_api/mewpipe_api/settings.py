@@ -110,3 +110,5 @@ STATIC_URL = '/static/'
 # DJANGO ALLAUTH
 
 ACCOUNT_EMAIL_VERIFICATION = "none"
+
+AUTH_USER_MODEL = "rest_api.UserAccount"

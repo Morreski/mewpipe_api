@@ -14,14 +14,15 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include(blog_urls))
 """
 
-from rest_api.views import FacebookLogin
+from rest_api.views import FacebookLogin, Register
 from django.conf.urls import include, url
-#from django.contrib import admin
+from django.contrib import admin
 
 urlpatterns = [
-    #url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', include(admin.site.urls)),
     url(r'^api/', include('rest_api.urls')),
     url(r'^api/', include('rest_auth.urls')),
     url(r'^api/registration/', include('rest_auth.registration.urls')),
+    url(r'^api/register/', Register.as_view()),
     url(r'^api/facebook/', FacebookLogin.as_view(), name='fb_login')
 ]

@@ -1,7 +1,13 @@
 from rest_framework import serializers
 from rest_api.models import Video, Tag
 from rest_api.shortcuts import HtmlCleanField
+from django.contrib.auth import get_user_model
 
+class UserDetailsSerializer(serializers.ModelSerializer):
+  class Meta:
+    model = get_user_model()
+    fields = ('username', 'email', 'first_name', 'last_name')
+    read_only_fields = ('email', )
 
 class UserAccountSerializer(serializers.ModelSerializer):
   first_name  = serializers.CharField()
