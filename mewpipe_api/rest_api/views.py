@@ -2,10 +2,10 @@ from django.contrib.auth import login, logout
 from django.shortcuts import render
 from django.conf import settings
 from django.http import HttpRequest
-from .serializers import UserDetailsSerializer
+from .serializers import UserDetailsSerializer, PasswordChangeSerializer
 
 from rest_framework.authtoken.models import Token
-from rest_framework.generics import GenericAPIView
+from rest_framework.generics import GenericAPIView, RetrieveUpdateAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -125,3 +125,25 @@ class Logout(APIView):
 
         return Response({"success": "Successfully logged out."},
                         status=status.HTTP_200_OK)
+
+class UserDetails(RetrieveUpdateAPIView):
+
+    serializer_class = UserDetailsSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def get_object(self):
+        return self.request.user
+
+class PasswordChange(GenericAPIView):
+
+    serializer_class = PasswordChangeSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.DATA)
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors, status=status.HTTP_400_BAD_REQUEST
+            )
+        serializer.save()
+        return Response({"success": "New password has been saved."})
