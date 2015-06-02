@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include(blog_urls))
 """
 
-from rest_api.views import FacebookLogin, Register, VerifyEmail, Login
+from rest_api.views import FacebookLogin, Register, VerifyEmail, Login, Logout
 from django.conf.urls import include, url
 from django.contrib import admin
 
@@ -26,5 +26,6 @@ urlpatterns = [
     #url(r'^api/verify-email', VerifyEmail.as_view()),
     url(r'^api/register$', Register.as_view()),
     url(r'^api/login$', Login.as_view(), name='rest_login'),
+    url(r'^api/logout$', Logout.as_view(), name='rest_logout'),
     url(r'^api/facebook$', FacebookLogin.as_view(), name='fb_login')
 ]

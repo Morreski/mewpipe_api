@@ -8,7 +8,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.generics import GenericAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import status
 
 from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
@@ -110,3 +110,18 @@ class Login(GenericAPIView):
             return self.get_error_response()
         self.login()
         return self.get_response()
+
+class Logout(APIView):
+
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        try:
+            request.user.auth_token.delete()
+        except:
+            pass
+
+        logout(request)
+
+        return Response({"success": "Successfully logged out."},
+                        status=status.HTTP_200_OK)
