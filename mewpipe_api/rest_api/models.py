@@ -168,7 +168,10 @@ class Video(BaseModel):
   @property
   def hr_duration(self):
     m, s = divmod(self.duration, 60)
-    return "{0}:{1}".format(m, s)
+    m = str(m) if m >= 10 else "0"+str(m)
+    s = str(s) if s >= 10 else "0"+str(s)
+    return "%s:%s" % (m, s)
+
 
   @property
   def shares_statistics(self):
