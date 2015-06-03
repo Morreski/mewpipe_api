@@ -21,7 +21,7 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api/', include('rest_api.urls')),
-    url(r'^api/', include('rest_auth.urls')),
+    #url(r'^api/', include('rest_auth.urls')),
     url(r'^api/registration/', include('rest_auth.registration.urls')),
     #url(r'^api/verify-email', VerifyEmail.as_view()),
     url(r'^api/register/$', Register.as_view()),

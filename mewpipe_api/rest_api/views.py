@@ -2,13 +2,17 @@ from django.contrib.auth import login, logout
 from django.shortcuts import render
 from django.conf import settings
 from django.http import HttpRequest
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 from .serializers import UserDetailsSerializer, PasswordChangeSerializer
+from .permissions import IsAnonymous
 
 from rest_framework.authtoken.models import Token
 from rest_framework.generics import GenericAPIView, RetrieveUpdateAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.authentication import TokenAuthentication
 from rest_framework import status
 
 from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
@@ -28,7 +32,7 @@ class FacebookLogin(SocialLogin):
 
 class Register(APIView, SignupView):
 
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAnonymous,)
     user_serializer_class = UserDetailsSerializer
     allowed_methods = ('POST', 'OPTIONS', 'HEAD')
 
@@ -82,10 +86,14 @@ class VerifyEmail(APIView, ConfirmEmailView):
 
 class Login(GenericAPIView):
 
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAnonymous,)
     serializer_class = LoginSerializer
     token_model = Token
     response_serializer = TokenSerializer
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(Login, self).dispatch(request, *args, **kwargs)
 
     def login(self):
         self.user = self.serializer.validated_data['user']
@@ -123,6 +131,7 @@ class Logout(APIView):
 
 class UserDetails(RetrieveUpdateAPIView):
 
+    authentication_classes = (TokenAuthentication,)
     serializer_class = UserDetailsSerializer
     permission_classes = (IsAuthenticated,)
 
