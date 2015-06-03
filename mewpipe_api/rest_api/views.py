@@ -54,6 +54,7 @@ class Login(GenericAPIView):
 
 class Logout(APIView):
 
+  authentication_classes = (TokenAuthentication,)
   permission_classes = (IsAuthenticated,)
 
   def post(self, request):
@@ -151,19 +152,6 @@ class Login(GenericAPIView):
       return self.get_error_response()
     self.login()
     return Response({'token': self.token.key}, status=status.HTTP_200_OK)
-
-class Logout(APIView):
-
-  permission_classes = (IsAuthenticated,)
-
-  def post(self, request):
-    try:
-      request.user.auth_token.delete()
-    except:
-      pass
-
-    logout(request)
-    return Response({"success": "Successfully logged out."},status=status.HTTP_200_OK)
 
 class UserDetails(RetrieveUpdateAPIView):
 
