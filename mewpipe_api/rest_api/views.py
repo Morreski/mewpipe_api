@@ -94,11 +94,6 @@ class Login(GenericAPIView):
         if getattr(settings, 'REST_SESSION_LOGIN', True):
             login(self.request, self.user)
 
-    def get_response(self):
-        return Response(
-            self.response_serializer(self.token).data, status=status.HTTP_200_OK
-        )
-
     def get_error_response(self):
         return Response(
             self.serializer.errors, status=status.HTTP_400_BAD_REQUEST
@@ -109,7 +104,7 @@ class Login(GenericAPIView):
         if not self.serializer.is_valid():
             return self.get_error_response()
         self.login()
-        return self.get_response()
+        return Response({'token': self.token.key}, status=status.HTTP_200_OK)
 
 class Logout(APIView):
 

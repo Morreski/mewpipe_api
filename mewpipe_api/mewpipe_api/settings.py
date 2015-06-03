@@ -62,6 +62,7 @@ MIDDLEWARE_CLASSES = (
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
+    'rest_framework.authentication.TokenAuthentication'
 )
 
 ROOT_URLCONF = 'mewpipe_api.urls'
