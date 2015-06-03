@@ -48,7 +48,6 @@ class User(BaseModel):
     if ip_address:
       return TemporaryUser.objects.get_or_create(ip=ip_address)[0]
 
-
 class TemporaryUser(User):
   ip = models.GenericIPAddressField(unpack_ipv4=True, unique=True)
 
@@ -76,7 +75,7 @@ class CustomUserManager(BaseUserManager):
 
   use_in_migrations = True
 
-class UserAccount(AbstractBaseUser, PermissionsMixin):
+class UserAccount(AbstractBaseUser, User, PermissionsMixin):
   username    = models.CharField(_('Username'), max_length = 50, unique=True)
   email       = models.EmailField(_('Email address'), max_length=254, unique=True)
   first_name  = models.CharField(_('First name'), max_length=50, blank=True)
