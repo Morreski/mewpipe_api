@@ -1,5 +1,4 @@
 from django.contrib.auth import login, logout
-from django.shortcuts import render
 from django.conf import settings
 from django.http import HttpRequest
 from django.utils.decorators import method_decorator
@@ -152,18 +151,6 @@ class Login(GenericAPIView):
     self.login()
     return Response({'token': self.token.key}, status=status.HTTP_200_OK)
 
-class Logout(APIView):
-
-  permission_classes = (IsAuthenticated,)
-
-  def post(self, request):
-    try:
-      request.user.auth_token.delete()
-    except:
-      pass
-
-    logout(request)
-    return Response({"success": "Successfully logged out."},status=status.HTTP_200_OK)
 
 class UserDetails(RetrieveUpdateAPIView):
 
