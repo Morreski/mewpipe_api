@@ -57,8 +57,8 @@ MIDDLEWARE_CLASSES = (
 #    'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
 
-    'rest_api.middlewares.crossdomain_middleware.XsSharing',
     'rest_api.middlewares.auth.JwtAuth',
+    'rest_api.middlewares.crossdomain_middleware.XsSharing',
 )
 
 APPEND_SLASH=False
