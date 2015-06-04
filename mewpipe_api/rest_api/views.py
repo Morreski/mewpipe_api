@@ -1,12 +1,9 @@
-from django.contrib.auth import login, logout
-from django.conf import settings
+from django.contrib.auth import logout
 from django.http import HttpRequest
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import csrf_exempt
-from .serializers import UserDetailsSerializer, PasswordChangeSerializer
+from django.conf import settings
+from .serializers import UserDetailsSerializer, PasswordChangeSerializer, LoginSerializer
 from .permissions import IsAnonymous
 
-from rest_framework.authtoken.models import Token
 from rest_framework.generics import GenericAPIView, RetrieveUpdateAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -19,9 +16,11 @@ from allauth.account.views import SignupView, ConfirmEmailView
 from allauth.account.utils import complete_signup
 from allauth.account import app_settings
 
+from rest_api.shortcuts import JsonResponse
+from rest_api.models import UserAccount
 from rest_auth.registration.serializers import SocialLoginSerializer
-from rest_auth.serializers import LoginSerializer, TokenSerializer
-
+import jwt, time
+"""
 class Login(GenericAPIView):
 
   permission_classes = (IsAnonymous,)
@@ -50,6 +49,48 @@ class Login(GenericAPIView):
       return self.get_error_response()
     self.login()
     return Response({'token': self.token.key}, status=status.HTTP_200_OK)
+"""
+class Login(APIView):
+
+  def get_user(self, identifier):
+    try:
+      return UserAccount.objects.get(username=identifier)
+    except UserAccount.DoesNotExist:
+      pass
+
+    try:
+      return UserAccount.objects.get(email=identifier)
+    except UserAccount.DoesNotExist:
+      pass
+
+    return None
+
+  def post(self, request, *args, **kwargs):
+    s = LoginSerializer(data=request.data)
+    if not s.is_valid():
+      return JsonResponse(s.errors, status=400)
+
+    u = self.get_user(s.data['identifier'])
+    if u is None:
+      return JsonResponse({}, status=404)
+
+    if not u.check_password(s.data["password"]):
+      return JsonResponse({}, status=401)
+
+    serialized_user = UserDetailsSerializer(u)
+
+    #Let the magic do the work !
+    secret = settings.TOKEN_SECRET
+    token_payload = {"user" : serialized_user.data, "exp"  : int(time.time()) + settings.TOKEN_TTL}
+    token = jwt.encode(
+        token_payload,
+        secret,
+        algorithm="HS256"
+    )
+
+    return JsonResponse(
+        {"token" : token},
+    )
 
 class Logout(APIView):
 
@@ -121,35 +162,6 @@ class VerifyEmail(APIView, ConfirmEmailView):
     confirmation = self.get_object()
     confirmation.confirm(self.request)
     return Response({'message': 'ok'}, status=status.HTTP_200_OK)
-
-class Login(GenericAPIView):
-
-  permission_classes = (IsAnonymous,)
-  serializer_class = LoginSerializer
-  token_model = Token
-  response_serializer = TokenSerializer
-
-  @method_decorator(csrf_exempt)
-  def dispatch(self, request, *args, **kwargs):
-    return super(Login, self).dispatch(request, *args, **kwargs)
-
-  def login(self):
-      self.user = self.serializer.validated_data['user']
-      self.token, created = self.token_model.objects.get_or_create(user=self.user)
-      if getattr(settings, 'REST_SESSION_LOGIN', True):
-        login(self.request, self.user)
-
-  def get_error_response(self):
-    return Response(
-      self.serializer.errors, status=status.HTTP_400_BAD_REQUEST
-    )
-
-  def post(self, request, *args, **kwargs):
-    self.serializer = self.get_serializer(data=self.request.DATA)
-    if not self.serializer.is_valid():
-      return self.get_error_response()
-    self.login()
-    return Response({'token': self.token.key}, status=status.HTTP_200_OK)
 
 
 class UserDetails(RetrieveUpdateAPIView):

@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include(blog_urls))
 """
 
-from rest_api.views import FacebookLogin, Register, VerifyEmail, Login, Logout, UserDetails, PasswordChange
+from rest_api.views import FacebookLogin, Register, Login, Logout, UserDetails, PasswordChange
 from django.conf.urls import include, url
 from django.contrib import admin
 

@@ -1,11 +1,15 @@
-from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
+from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth import get_user_model
-from django.conf import settings
 
 from rest_framework import serializers
 
 from rest_api.models import Video, Tag
 from rest_api.shortcuts import HtmlCleanField
+
+class LoginSerializer(serializers.Serializer):
+  identifier = serializers.CharField(max_length=254)
+  password = serializers.CharField(max_length=254)
+
 
 class PasswordChangeSerializer(serializers.Serializer):
 
@@ -16,14 +20,7 @@ class PasswordChangeSerializer(serializers.Serializer):
   set_password_form_class = SetPasswordForm
 
   def __init__(self, *args, **kwargs):
-    self.old_password_field_enabled = getattr(
-      settings, 'OLD_PASSWORD_FIELD_ENABLED', False
-    )
     super(PasswordChangeSerializer, self).__init__(*args, **kwargs)
-
-    if not self.old_password_field_enabled:
-      self.fields.pop('old_password')
-
     self.request = self.context.get('request')
     self.user = getattr(self.request, 'user', None)
 
@@ -53,7 +50,7 @@ class PasswordChangeSerializer(serializers.Serializer):
 class UserDetailsSerializer(serializers.ModelSerializer):
   class Meta:
     model = get_user_model()
-    fields = ('username', 'email', 'first_name', 'last_name')
+    fields = ('uid', 'username', 'email', 'first_name', 'last_name')
     read_only_fields = ('email', )
 
 class TagSerializer(serializers.ModelSerializer):
