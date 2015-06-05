@@ -44,7 +44,7 @@ class JwtAuth(object):
       settings.TOKEN_SECRET,
       algorithm="HS256"
     )
-    response['HTTP_AUTHORIZATION'] = token
+    response['Authorization'] = token
     return response
 
 
