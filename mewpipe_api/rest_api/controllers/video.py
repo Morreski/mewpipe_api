@@ -49,8 +49,6 @@ class VideoControllerGeneral(generics.ListCreateAPIView):
     if search_string == '':
       return generics.ListCreateAPIView.list(self, request, *args, **kwargs)
 
-    qs = self.get_queryset()
-
     match_sentences, match_tags, match_words = ([], [], [])
     terms = normalize_query(search_string)
     for index,term in enumerate(terms):

@@ -31,3 +31,6 @@ DATABASES = {
         'PORT' : '',
     }
 }
+#TOKEN
+TOKEN_TTL = 60 #sec
+TOKEN_SECRET = "fszfzse6457dfsz6e8f476@98d94q56"

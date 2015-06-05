@@ -48,26 +48,37 @@ class User(BaseModel):
     if ip_address:
       return TemporaryUser.objects.get_or_create(ip=ip_address)[0]
 
+  @property
+  def concrete_user(self):
+    if type(self) != User:
+      return self
+
+    for cls in User.__subclasses__():
+      attribute = cls.__name__.lower()
+      if hasattr(self, attribute):
+        return getattr(self, attribute)
+
+    raise ValueError("User Cast Error - If this error is raised, this is bad and you should feel bad")
+
 class TemporaryUser(User):
   ip = models.GenericIPAddressField(unpack_ipv4=True, unique=True)
 
 class CustomUserManager(BaseUserManager):
   def _create_user(self, username, email, fname, lname, password, is_staff, is_superuser, **extra_fields):
 
-    now = timezone.now()
     email = self.normalize_email(email)
     user = self.model(username=username,
                       email=email,
                       first_name=fname,
                       last_name=lname,
                       is_staff=is_staff, is_active=True,
-                      is_superuser=is_superuser, last_login=now,
-                      date_joined=now, **extra_fields)
+                      is_superuser=is_superuser,
+                      **extra_fields)
     user.set_password(password)
     user.save(using=self._db)
     return user
 
-  def create_user(self, username, email, fname, lname, password=None, **extra_fields):
+  def create_user(self, username, email, fname, lname, password, **extra_fields):
     return self._create_user(username, email, fname, lname, password, False, False, **extra_fields)
 
   def create_superuser(self, username, email, fname, lname, password, **extra_fields):
@@ -82,7 +93,7 @@ class UserAccount(AbstractBaseUser, User, PermissionsMixin):
   last_name   = models.CharField(_('Last name'), max_length=50, blank=True)
   is_staff    = models.BooleanField(_('is staff'), default=False)
   is_active   = models.BooleanField(_('is active'), default=True)
-  date_joined = models.DateTimeField(_('Join date'), default=timezone.now)
+  date_joined = models.DateTimeField(_('Join date'), auto_now_add=True)
 
   objects = CustomUserManager()
   USERNAME_FIELD = 'username'

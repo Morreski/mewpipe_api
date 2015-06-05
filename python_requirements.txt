@@ -7,3 +7,4 @@ pyyaml
 django-rest-auth
 django-allauth
 uwsgi
+pyjwt
