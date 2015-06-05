@@ -20,36 +20,8 @@ from rest_api.shortcuts import JsonResponse
 from rest_api.models import UserAccount
 from rest_auth.registration.serializers import SocialLoginSerializer
 import jwt, time
-"""
-class Login(GenericAPIView):
 
-  permission_classes = (IsAnonymous,)
-  serializer_class = LoginSerializer
-  token_model = Token
-  response_serializer = TokenSerializer
 
-  @method_decorator(csrf_exempt)
-  def dispatch(self, request, *args, **kwargs):
-    return super(Login, self).dispatch(request, *args, **kwargs)
-
-  def login(self):
-      self.user = self.serializer.validated_data['user']
-      self.token, created = self.token_model.objects.get_or_create(user=self.user)
-      if getattr(settings, 'REST_SESSION_LOGIN', True):
-        login(self.request, self.user)
-
-  def get_error_response(self):
-    return Response(
-      self.serializer.errors, status=status.HTTP_400_BAD_REQUEST
-    )
-
-  def post(self, request, *args, **kwargs):
-    self.serializer = self.get_serializer(data=self.request.DATA)
-    if not self.serializer.is_valid():
-      return self.get_error_response()
-    self.login()
-    return Response({'token': self.token.key}, status=status.HTTP_200_OK)
-"""
 class Login(APIView):
 
   def get_user(self, identifier):

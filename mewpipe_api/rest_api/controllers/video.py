@@ -4,7 +4,6 @@ from rest_framework import filters
 from rest_framework.views import APIView
 
 from django.db.transaction import atomic
-from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.http import HttpResponse
@@ -18,8 +17,6 @@ from rest_api.videoconverter import video_ready
 from django.views.generic import View
 import itertools
 
-def get_video_privacy_filter():
-  pass
 
 class VideoControllerGeneral(generics.ListCreateAPIView):
 
@@ -51,8 +48,6 @@ class VideoControllerGeneral(generics.ListCreateAPIView):
     search_string = request.GET.get('s', '')
     if search_string == '':
       return generics.ListCreateAPIView.list(self, request, *args, **kwargs)
-
-    qs = self.get_queryset()
 
     match_sentences, match_tags, match_words = ([], [], [])
     terms = normalize_query(search_string)
