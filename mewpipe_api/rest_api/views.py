@@ -66,9 +66,6 @@ class Login(APIView):
 
 class Logout(APIView):
 
-  authentication_classes = (TokenAuthentication,)
-  permission_classes = (IsAuthenticated,)
-
   def post(self, request):
     try:
       request.user.auth_token.delete()
@@ -138,9 +135,7 @@ class VerifyEmail(APIView, ConfirmEmailView):
 
 class UserDetails(RetrieveUpdateAPIView):
 
-  authentication_classes = (TokenAuthentication,)
   serializer_class = UserDetailsSerializer
-  permission_classes = (IsAuthenticated,)
 
   def get_object(self):
     return self.request.user
@@ -148,8 +143,6 @@ class UserDetails(RetrieveUpdateAPIView):
 class PasswordChange(GenericAPIView):
 
   serializer_class = PasswordChangeSerializer
-  permission_classes = (IsAuthenticated,)
-  authentication_classes = (TokenAuthentication,)
 
   def post(self, request):
     serializer = self.get_serializer(data=request.DATA)

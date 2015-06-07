@@ -25,7 +25,7 @@ urlpatterns = [
     #url(r'^api/verify-email', VerifyEmail.as_view()),
     url(r'^api/register/$', Register.as_view()),
     url(r'^api/login/$', Login.as_view(), name='rest_login'),
-    url(r'^api/logout/$', Logout.as_view(), name='rest_logout'),
+    #url(r'^api/logout/$', Logout.as_view(), name='rest_logout'),
     url(r'^api/user/$', UserDetails.as_view(), name='rest_user_details'),
     url(r'^api/user/password/$', PasswordChange.as_view(), name='rest_password_change'),
     url(r'^api/facebook/$', FacebookLogin.as_view(), name='fb_login')

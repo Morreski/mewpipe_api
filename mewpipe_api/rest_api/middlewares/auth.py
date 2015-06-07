@@ -18,7 +18,6 @@ class JwtAuth(object):
     else:
       token = header_args[1]
 
-
     try:
       token_data = jwt.decode(token, settings.TOKEN_SECRET)
     except jwt.DecodeError:
@@ -46,5 +45,3 @@ class JwtAuth(object):
     )
     response['Authorization'] = token
     return response
-
-
