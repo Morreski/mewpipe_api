@@ -10,7 +10,6 @@ class LoginSerializer(serializers.Serializer):
   identifier = serializers.CharField(max_length=254)
   password = serializers.CharField(max_length=254)
 
-
 class PasswordChangeSerializer(serializers.Serializer):
 
   old_password = serializers.CharField(max_length=128)

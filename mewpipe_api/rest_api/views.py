@@ -1,8 +1,8 @@
+from django.views.generic.edit import FormView
 from django.contrib.auth import logout
 from django.http import HttpRequest
 from django.conf import settings
 from .serializers import UserDetailsSerializer, PasswordChangeSerializer, LoginSerializer
-from .permissions import IsAnonymous
 
 from rest_framework.generics import GenericAPIView, RetrieveUpdateAPIView
 from rest_framework.views import APIView
@@ -16,6 +16,7 @@ from allauth.account.views import SignupView, ConfirmEmailView
 from allauth.account.utils import complete_signup
 from allauth.account import app_settings
 
+from rest_api.forms import UserAccountCreationForm
 from rest_api.shortcuts import JsonResponse
 from rest_api.models import UserAccount
 from rest_auth.registration.serializers import SocialLoginSerializer
@@ -81,44 +82,6 @@ class SocialLogin(Login):
 class FacebookLogin(SocialLogin):
   adapter_class = FacebookOAuth2Adapter
 
-class Register(APIView, SignupView):
-
-  permission_classes = (IsAnonymous,)
-  user_serializer_class = UserDetailsSerializer
-  allowed_methods = ('POST', 'OPTIONS', 'HEAD')
-
-  def get(self, *args, **kwargs):
-    return Response({}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-  def put(self, *args, **kwargs):
-    return Response({}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-  def form_valid(self, form):
-    self.user = form.save(self.request)
-    if isinstance(self.request, HttpRequest):
-      request = self.request
-    else:
-      request = self.request._request
-    return complete_signup(request, self.user, app_settings.EMAIL_VERIFICATION, self.get_success_url())
-
-  def post(self, request, *args, **kwargs):
-    self.initial = {}
-    self.request.POST = self.request.DATA.copy()
-    form_class = self.get_form_class()
-    self.form = self.get_form(form_class)
-    if self.form.is_valid():
-      self.form_valid(self.form)
-      return self.get_response()
-    else:
-      return self.get_response_with_errors()
-
-  def get_response(self):
-    serializer = self.user_serializer_class(instance=self.user)
-    return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-  def get_response_with_errors(self):
-    return Response(self.form.errors, status=status.HTTP_400_BAD_REQUEST)
-
 class VerifyEmail(APIView, ConfirmEmailView):
 
   permission_classes = (AllowAny,)
@@ -133,12 +96,28 @@ class VerifyEmail(APIView, ConfirmEmailView):
     confirmation.confirm(self.request)
     return Response({'message': 'ok'}, status=status.HTTP_200_OK)
 
-class UserDetails(RetrieveUpdateAPIView):
+class UserController(APIView, FormView):
 
   serializer_class = UserDetailsSerializer
+  allowed_methods = ('POST', 'OPTIONS', 'HEAD')
 
-  def get_object(self):
-    return self.request.user
+  def form_valid(self, form):
+    self.user = form.save(self.request)
+
+  def get_response(self):
+    serializer = self.serializer_class(instance=self.user)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+  def post(self, request, *args, **kwargs):
+    self.initial = {}
+    self.request.POST = self.request.DATA.copy()
+    form_class = UserAccountCreationForm
+    self.form = self.get_form(form_class)
+    if self.form.is_valid():
+      self.user = self.form.save(self.request)
+      return self.get_response()
+    else:
+      return Response(self.form.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class PasswordChange(GenericAPIView):
 
