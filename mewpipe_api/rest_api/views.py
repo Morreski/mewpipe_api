@@ -45,7 +45,7 @@ class Login(APIView):
 
     u = self.get_user(s.data['identifier'])
     if u is None:
-      return JsonResponse({}, status=404)
+      return JsonResponse({}, status=401)
 
     if not u.check_password(s.data["password"]):
       return JsonResponse({}, status=401)
@@ -56,23 +56,18 @@ class Login(APIView):
     secret = settings.TOKEN_SECRET
     token_payload = {"user" : serialized_user.data, "exp"  : int(time.time()) + settings.TOKEN_TTL}
     token = jwt.encode(
-        token_payload,
-        secret,
-        algorithm="HS256"
+      token_payload,
+      secret,
+      algorithm="HS256"
     )
 
     return JsonResponse(
-        {"token" : token},
+      {"token" : token},
     )
 
 class Logout(APIView):
 
   def post(self, request):
-    try:
-      request.user.auth_token.delete()
-    except:
-      pass
-
     logout(request)
     return Response({"success": "Successfully logged out."},status=status.HTTP_200_OK)
 
@@ -82,24 +77,10 @@ class SocialLogin(Login):
 class FacebookLogin(SocialLogin):
   adapter_class = FacebookOAuth2Adapter
 
-class VerifyEmail(APIView, ConfirmEmailView):
-
-  permission_classes = (AllowAny,)
-  allowed_methods = ('POST', 'OPTIONS', 'HEAD')
-
-  def get(self, *args, **kwargs):
-    return Response({}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-  def post(self, request, *args, **kwargs):
-    self.kwargs['key'] = self.request.DATA.get('key', '')
-    confirmation = self.get_object()
-    confirmation.confirm(self.request)
-    return Response({'message': 'ok'}, status=status.HTTP_200_OK)
-
 class UserController(APIView, FormView):
 
   serializer_class = UserDetailsSerializer
-  allowed_methods = ('POST', 'OPTIONS', 'HEAD')
+  allowed_methods = ('POST', 'PUT', 'OPTIONS', 'HEAD')
 
   def form_valid(self, form):
     self.user = form.save(self.request)
@@ -118,6 +99,23 @@ class UserController(APIView, FormView):
       return self.get_response()
     else:
       return Response(self.form.errors, status=status.HTTP_400_BAD_REQUEST)
+
+  def put(self, request, *args, **kwargs):
+    user = UserAccount.objects.get(uid=request.user_uid)
+    serialized_user = UserDetailsSerializer(user, data=request.data)
+    if serialized_user.is_valid():
+        serialized_user.save()
+
+        secret = settings.TOKEN_SECRET
+        token_payload = {"user" : serialized_user.data, "exp"  : int(time.time()) + settings.TOKEN_TTL}
+        token = jwt.encode(
+          token_payload,
+          secret,
+          algorithm="HS256"
+        )
+
+        return JsonResponse({"token" : token, "user" : serialized_user.data},)
+    return Response(serialized_user.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class PasswordChange(GenericAPIView):
 

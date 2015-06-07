@@ -9,7 +9,7 @@ class JwtAuth(object):
   def process_request(self, request):
     auth_header = request.META.get('HTTP_AUTHORIZATION')
     if not auth_header:
-      request.user_uid =  None
+      request.user_uid = None
       return
 
     header_args = auth_header.split(' ')

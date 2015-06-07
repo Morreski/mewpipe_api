@@ -7,8 +7,8 @@ from rest_api.models import UserAccount
 class UserAccountCreationForm(forms.ModelForm):
 
   error_messages = {
-    'duplicate_email': _("Cette adresse email est deja utilisee."),
-    'password_mismatch': _("Les deux mots de passe ne sont pas similaires.")
+    'duplicate_email': _("This email address is already in use."),
+    'password_mismatch': _("The two passwords are not the same.")
   }
 
   password1     = forms.CharField(label=_("Password"), widget=forms.PasswordInput)
@@ -46,4 +46,4 @@ class UserAccountChangeForm(UserChangeForm):
 
   class Meta:
     model = UserAccount
-    exclude = ['is_staff', 'is_active', 'date_joined']
+    exclude = ['is_staff', 'is_active', 'date_joined', 'watched', 'password']

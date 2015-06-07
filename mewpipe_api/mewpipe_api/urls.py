@@ -21,8 +21,6 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^api/', include('rest_api.urls')),
-    #url(r'^api/', include('rest_auth.urls')),
-    #url(r'^api/verify-email', VerifyEmail.as_view()),
     url(r'^api/login/$', Login.as_view(), name='rest_login'),
     #url(r'^api/logout/$', Logout.as_view(), name='rest_logout'),
     url(r'^api/user/$', UserController.as_view(), name='rest_user_details'),
