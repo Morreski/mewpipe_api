@@ -12,7 +12,7 @@ from rest_api.shortcuts import JsonResponse, get_by_uid, normalize_query
 from rest_api.models import Video, Tag, VideoTag, User
 from rest_api.serializers import VideoSerializer, ShareSerializer
 from rest_api.paginators import VideoPaginator
-from rest_api.videoconverter import video_ready
+from rest_api.tasks import task_convert
 
 from django.views.generic import View
 import itertools
@@ -48,6 +48,8 @@ class VideoControllerGeneral(generics.ListCreateAPIView):
     search_string = request.GET.get('s', '')
     if search_string == '':
       return generics.ListCreateAPIView.list(self, request, *args, **kwargs)
+
+    qs = self.get_queryset()
 
     match_sentences, match_tags, match_words = ([], [], [])
     terms = normalize_query(search_string)
@@ -158,7 +160,7 @@ class UploadVideoController(APIView):
       return JsonResponse({"file" : "Video size too large"}, status=413)
 
     video.writeOnDisk(file, ext)
-    video_ready.send(sender=self.__class__, video=video, ext=ext)
+    task_convert.delay(video, ext)
 
     return JsonResponse({})
 

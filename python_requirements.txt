@@ -8,3 +8,5 @@ django-rest-auth
 django-allauth
 uwsgi
 pyjwt
+celery
+django-celery

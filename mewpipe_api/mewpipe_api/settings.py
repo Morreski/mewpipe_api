@@ -32,6 +32,7 @@ INSTALLED_APPS = (
 
     #External Libs
     'django_extensions',
+    'djcelery',
 
     'rest_framework',
     'rest_framework.authtoken',

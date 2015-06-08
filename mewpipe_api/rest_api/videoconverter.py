@@ -1,6 +1,6 @@
 from django.conf import settings
 from subprocess import check_output
-from django.dispatch import receiver, Signal
+from django.dispatch import Signal
 from datetime import timedelta
 import os, json
 
@@ -10,7 +10,6 @@ def get_video_metadatas(video_path):
   out = check_output("exiftool -j %s" % video_path, shell=True)
   return json.loads(out)[0]
 
-@receiver(video_ready)
 def convert(video, ext, **kwargs):
   name = str(video.uid)
   input_path = os.path.join(settings.UPLOAD_DIR, "pending_videos", name + '.' + ext)
