@@ -25,10 +25,15 @@ class JwtAuth(object):
     except jwt.ExpiredSignatureError:
       return JsonResponse({"tokenError" : "Token expired"}, status=401)
 
+    #TODO Verifier si l'UID appartient bien a un USER existant.
     request.user_uid = token_data["user"]["uid"]
     return
 
   def process_response(self, request, response):
+    if hasattr(response, "no_token"):
+      if response.no_token:
+        return response
+
     if response.status_code != 200:
       return response
 

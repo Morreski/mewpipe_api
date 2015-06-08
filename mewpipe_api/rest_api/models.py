@@ -97,10 +97,8 @@ class UserAccount(AbstractBaseUser, User, PermissionsMixin):
 
   objects = CustomUserManager()
   USERNAME_FIELD = 'username'
-  REQUIRED_FIELDS = ['email']
 
   serialized = ('first_name', 'last_name', 'email', 'username', 'birth_date', 'is_active')
-
 
 class Video(BaseModel):
 

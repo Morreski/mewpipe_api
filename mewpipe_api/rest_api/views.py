@@ -18,7 +18,7 @@ from allauth.account import app_settings
 
 from rest_api.forms import UserAccountCreationForm
 from rest_api.shortcuts import JsonResponse
-from rest_api.models import UserAccount
+from rest_api.models import UserAccount, Video
 from rest_auth.registration.serializers import SocialLoginSerializer
 import jwt, time
 
@@ -41,14 +41,14 @@ class Login(APIView):
   def post(self, request, *args, **kwargs):
     s = LoginSerializer(data=request.data)
     if not s.is_valid():
-      return JsonResponse(s.errors, status=400)
+      return JsonResponse(s.errors, status=status.HTTP_400_BAD_REQUEST)
 
     u = self.get_user(s.data['identifier'])
     if u is None:
-      return JsonResponse({}, status=401)
+      return JsonResponse({"error":"User does not exist"}, status=status.HTTP_401_UNAUTHORIZED)
 
     if not u.check_password(s.data["password"]):
-      return JsonResponse({}, status=401)
+      return JsonResponse({{"error":"Wrong password"}}, status=status.HTTP_401_UNAUTHORIZED)
 
     serialized_user = UserDetailsSerializer(u)
 
@@ -101,21 +101,54 @@ class UserController(APIView, FormView):
       return Response(self.form.errors, status=status.HTTP_400_BAD_REQUEST)
 
   def put(self, request, *args, **kwargs):
-    user = UserAccount.objects.get(uid=request.user_uid)
+    if not request.user_uid:
+      return JsonResponse({}, status=status.HTTP_401_UNAUTHORIZED)
+
+    try:
+      user_account = UserAccount.objects.get(uid=request.user_uid)
+    except UserAccount.DoesNotExist:
+      return JsonResponse({"error":"Wrong User"}, status=status.HTTP_401_UNAUTHORIZED)
     serialized_user = UserDetailsSerializer(user, data=request.data)
     if serialized_user.is_valid():
-        serialized_user.save()
+      serialized_user.save()
 
-        secret = settings.TOKEN_SECRET
-        token_payload = {"user" : serialized_user.data, "exp"  : int(time.time()) + settings.TOKEN_TTL}
-        token = jwt.encode(
-          token_payload,
-          secret,
-          algorithm="HS256"
-        )
+      secret = settings.TOKEN_SECRET
+      token_payload = {"user" : serialized_user.data, "exp"  : int(time.time()) + settings.TOKEN_TTL}
+      token = jwt.encode(
+        token_payload,
+        secret,
+        algorithm="HS256"
+      )
 
-        return JsonResponse({"token" : token, "user" : serialized_user.data},)
+      return JsonResponse({"token" : token, "user" : serialized_user.data},)
     return Response(serialized_user.errors, status=status.HTTP_400_BAD_REQUEST)
+
+  def delete(self, request, *args, **kwargs):
+    if not request.user_uid:
+      return JsonResponse({"error":"Not authentified"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    try:
+      user_account = UserAccount.objects.get(uid=request.user_uid)
+    except UserAccount.DoesNotExist:
+      return JsonResponse({"error":"Wrong User"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    videos = Video.objects.filter(author=user_account)
+
+    if len(videos) != 0:
+      for vid in videos:
+        try:
+          vid.delete()
+        except:
+          return Response({"error":"Unable to delete all the videos"}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+      user_account.delete()
+    except:
+      return Response({"error":"Unable to delete the User"}, status=status.HTTP_400_BAD_REQUEST)
+
+    resp = Response({"success": "User successfully deleted with all its videos"}, status=status.HTTP_200_OK)
+    resp.no_token = True
+    return resp
 
 class PasswordChange(GenericAPIView):
 
