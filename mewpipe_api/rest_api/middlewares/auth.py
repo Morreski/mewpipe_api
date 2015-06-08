@@ -9,7 +9,7 @@ class JwtAuth(object):
   def process_request(self, request):
     auth_header = request.META.get('HTTP_AUTHORIZATION')
     if not auth_header:
-      request.user_uid =  None
+      request.user_uid = None
       return
 
     header_args = auth_header.split(' ')
@@ -17,7 +17,6 @@ class JwtAuth(object):
       token = header_args[0]
     else:
       token = header_args[1]
-
 
     try:
       token_data = jwt.decode(token, settings.TOKEN_SECRET)
@@ -46,5 +45,3 @@ class JwtAuth(object):
     )
     response['Authorization'] = token
     return response
-
-

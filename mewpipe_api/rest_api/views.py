@@ -1,8 +1,8 @@
+from django.views.generic.edit import FormView
 from django.contrib.auth import logout
 from django.http import HttpRequest
 from django.conf import settings
 from .serializers import UserDetailsSerializer, PasswordChangeSerializer, LoginSerializer
-from .permissions import IsAnonymous
 
 from rest_framework.generics import GenericAPIView, RetrieveUpdateAPIView
 from rest_framework.views import APIView
@@ -16,6 +16,7 @@ from allauth.account.views import SignupView, ConfirmEmailView
 from allauth.account.utils import complete_signup
 from allauth.account import app_settings
 
+from rest_api.forms import UserAccountCreationForm
 from rest_api.shortcuts import JsonResponse
 from rest_api.models import UserAccount
 from rest_auth.registration.serializers import SocialLoginSerializer
@@ -44,7 +45,7 @@ class Login(APIView):
 
     u = self.get_user(s.data['identifier'])
     if u is None:
-      return JsonResponse({}, status=404)
+      return JsonResponse({}, status=401)
 
     if not u.check_password(s.data["password"]):
       return JsonResponse({}, status=401)
@@ -55,26 +56,18 @@ class Login(APIView):
     secret = settings.TOKEN_SECRET
     token_payload = {"user" : serialized_user.data, "exp"  : int(time.time()) + settings.TOKEN_TTL}
     token = jwt.encode(
-        token_payload,
-        secret,
-        algorithm="HS256"
+      token_payload,
+      secret,
+      algorithm="HS256"
     )
 
     return JsonResponse(
-        {"token" : token},
+      {"token" : token},
     )
 
 class Logout(APIView):
 
-  authentication_classes = (TokenAuthentication,)
-  permission_classes = (IsAuthenticated,)
-
   def post(self, request):
-    try:
-      request.user.auth_token.delete()
-    except:
-      pass
-
     logout(request)
     return Response({"success": "Successfully logged out."},status=status.HTTP_200_OK)
 
@@ -84,72 +77,49 @@ class SocialLogin(Login):
 class FacebookLogin(SocialLogin):
   adapter_class = FacebookOAuth2Adapter
 
-class Register(APIView, SignupView):
+class UserController(APIView, FormView):
 
-  permission_classes = (IsAnonymous,)
-  user_serializer_class = UserDetailsSerializer
-  allowed_methods = ('POST', 'OPTIONS', 'HEAD')
-
-  def get(self, *args, **kwargs):
-    return Response({}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-  def put(self, *args, **kwargs):
-    return Response({}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+  serializer_class = UserDetailsSerializer
+  allowed_methods = ('POST', 'PUT', 'OPTIONS', 'HEAD')
 
   def form_valid(self, form):
     self.user = form.save(self.request)
-    if isinstance(self.request, HttpRequest):
-      request = self.request
-    else:
-      request = self.request._request
-    return complete_signup(request, self.user, app_settings.EMAIL_VERIFICATION, self.get_success_url())
+
+  def get_response(self):
+    serializer = self.serializer_class(instance=self.user)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
 
   def post(self, request, *args, **kwargs):
     self.initial = {}
     self.request.POST = self.request.DATA.copy()
-    form_class = self.get_form_class()
+    form_class = UserAccountCreationForm
     self.form = self.get_form(form_class)
     if self.form.is_valid():
-      self.form_valid(self.form)
+      self.user = self.form.save(self.request)
       return self.get_response()
     else:
-      return self.get_response_with_errors()
+      return Response(self.form.errors, status=status.HTTP_400_BAD_REQUEST)
 
-  def get_response(self):
-    serializer = self.user_serializer_class(instance=self.user)
-    return Response(serializer.data, status=status.HTTP_201_CREATED)
+  def put(self, request, *args, **kwargs):
+    user = UserAccount.objects.get(uid=request.user_uid)
+    serialized_user = UserDetailsSerializer(user, data=request.data)
+    if serialized_user.is_valid():
+        serialized_user.save()
 
-  def get_response_with_errors(self):
-    return Response(self.form.errors, status=status.HTTP_400_BAD_REQUEST)
+        secret = settings.TOKEN_SECRET
+        token_payload = {"user" : serialized_user.data, "exp"  : int(time.time()) + settings.TOKEN_TTL}
+        token = jwt.encode(
+          token_payload,
+          secret,
+          algorithm="HS256"
+        )
 
-class VerifyEmail(APIView, ConfirmEmailView):
-
-  permission_classes = (AllowAny,)
-  allowed_methods = ('POST', 'OPTIONS', 'HEAD')
-
-  def get(self, *args, **kwargs):
-    return Response({}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-  def post(self, request, *args, **kwargs):
-    self.kwargs['key'] = self.request.DATA.get('key', '')
-    confirmation = self.get_object()
-    confirmation.confirm(self.request)
-    return Response({'message': 'ok'}, status=status.HTTP_200_OK)
-
-class UserDetails(RetrieveUpdateAPIView):
-
-  authentication_classes = (TokenAuthentication,)
-  serializer_class = UserDetailsSerializer
-  permission_classes = (IsAuthenticated,)
-
-  def get_object(self):
-    return self.request.user
+        return JsonResponse({"token" : token, "user" : serialized_user.data},)
+    return Response(serialized_user.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class PasswordChange(GenericAPIView):
 
   serializer_class = PasswordChangeSerializer
-  permission_classes = (IsAuthenticated,)
-  authentication_classes = (TokenAuthentication,)
 
   def post(self, request):
     serializer = self.get_serializer(data=request.DATA)

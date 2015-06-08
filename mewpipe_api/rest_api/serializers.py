@@ -10,7 +10,6 @@ class LoginSerializer(serializers.Serializer):
   identifier = serializers.CharField(max_length=254)
   password = serializers.CharField(max_length=254)
 
-
 class PasswordChangeSerializer(serializers.Serializer):
 
   old_password = serializers.CharField(max_length=128)
@@ -51,7 +50,6 @@ class UserDetailsSerializer(serializers.ModelSerializer):
   class Meta:
     model = get_user_model()
     fields = ('uid', 'username', 'email', 'first_name', 'last_name')
-    read_only_fields = ('email', )
 
 class TagSerializer(serializers.ModelSerializer):
   videos = serializers.SlugRelatedField(
