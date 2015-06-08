@@ -13,6 +13,7 @@ from rest_api.models import Video, Tag, VideoTag, User
 from rest_api.serializers import VideoSerializer, ShareSerializer
 from rest_api.paginators import VideoPaginator
 from rest_api.tasks import task_convert
+from rest_api.videoconverter import extract_thumbnails_and_datas
 
 from django.views.generic import View
 import itertools
@@ -160,6 +161,7 @@ class UploadVideoController(APIView):
       return JsonResponse({"file" : "Video size too large"}, status=413)
 
     video.writeOnDisk(file, ext)
+    extract_thumbnails_and_datas(video, ext)
     task_convert.delay(video, ext)
 
     return JsonResponse({})
@@ -179,9 +181,6 @@ class ThumbnailVideoController(APIView):
 
     if video is None:
       return HttpResponse({}, status=404)
-
-    if video.status != Video.STATUS_READY:
-      return HttpResponse({}, status=403)
 
     if not time:
       time = video.thumbnail_frame
