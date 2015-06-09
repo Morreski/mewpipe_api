@@ -59,4 +59,4 @@ def convert(video, ext, **kwargs):
     check_output(command, shell=True)
 
   video.status = video.STATUS_READY
-  video.save()
+  video.save(update_fields=["status"]) #avoid conccurency problems by updating only one field

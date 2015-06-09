@@ -38,7 +38,7 @@ class VideoSerializer(serializers.ModelSerializer):
   status = serializers.ChoiceField(Video.STATUS_CHOICES, read_only=True)
 
   tags = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name')
-  author = UserDetailsSerializer(required=False)
+  author = UserDetailsSerializer(read_only=True)
   views_statistics = serializers.ReadOnlyField()
   shares_statistics = serializers.ReadOnlyField()
   file_urls = serializers.ReadOnlyField()
