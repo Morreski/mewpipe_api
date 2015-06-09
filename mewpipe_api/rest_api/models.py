@@ -49,7 +49,7 @@ class User(BaseModel):
       return TemporaryUser.objects.get_or_create(ip=ip_address)[0]
 
     elif kwargs.get('uid'):
-      return User.objects.get(uid = kwargs('uid') ).concrete_user
+      return User.objects.get(uid = kwargs['uid'] ).concrete_user
 
   @property
   def concrete_user(self):
