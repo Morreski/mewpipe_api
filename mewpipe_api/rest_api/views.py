@@ -1,19 +1,13 @@
 from django.views.generic.edit import FormView
 from django.contrib.auth import logout
-from django.http import HttpRequest
 from django.conf import settings
 from .serializers import UserDetailsSerializer, LoginSerializer
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.authentication import TokenAuthentication
 from rest_framework import status
 
 from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
-from allauth.account.views import SignupView, ConfirmEmailView
-from allauth.account.utils import complete_signup
-from allauth.account import app_settings
 
 from rest_api.forms import UserAccountCreationForm, UpdateProfileForm
 from rest_api.shortcuts import JsonResponse
@@ -107,7 +101,7 @@ class UserController(APIView, FormView):
       user_account = UserAccount.objects.get(uid=request.user_uid)
     except UserAccount.DoesNotExist:
       return JsonResponse({"error":"Wrong User"}, status=status.HTTP_401_UNAUTHORIZED)
-    
+
     self.initial = {}
     self.request.POST = self.request.DATA.copy()
     form = UpdateProfileForm(self.request.POST, instance=user_account)

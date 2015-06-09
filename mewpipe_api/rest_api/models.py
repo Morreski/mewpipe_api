@@ -134,7 +134,7 @@ class Video(BaseModel):
 
   privacy_policy = models.IntegerField(default=0, choices=PRIVACY_CHOICES)
 
-  author = models.ForeignKey(User, null = True) #TODO: Remove null=true
+  author = models.ForeignKey(UserAccount)
 
   thumbnail_frame = models.IntegerField(default=0)
   duration = models.IntegerField(default=0)

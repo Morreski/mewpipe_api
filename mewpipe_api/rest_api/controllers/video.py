@@ -82,6 +82,9 @@ class VideoControllerGeneral(generics.ListCreateAPIView):
     return generics.ListCreateAPIView.post(self, request, *args, **kwargs)
 
   def perform_create(self, serializer):
+    author = UserAccount.objects.get(uid=self.request.user_uid)
+    serializer.validated_data['author'] = author
+    print serializer.validated_data
     v = serializer.save()
     for tagName in self.tagNames:
       tagName = tagName.replace(' ', '').lower()
@@ -147,10 +150,7 @@ class UploadVideoController(APIView):
     if video.status != Video.STATUS_NEW:
       return JsonResponse({}, status = 403)
 
-    author = UserAccount.objects.get(uid=request.user_uid)
-
     video.status = Video.STATUS_UPLOADING
-    video.author = author
     video.save()
 
     filename = request.FILES[request.FILES.keys()[0]].name #get only first file in request
@@ -203,6 +203,9 @@ class ThumbnailVideoController(APIView):
 class DownloadVideoController(APIView):
 
   def get(self, request, *args, **kwargs):
+    print "*" * 60
+    print request.user_uid
+
     video_format = request.GET.get('video_format', "mp4")
 
     if video_format not in settings.SUPPORTED_VIDEO_FORMATS:
@@ -220,11 +223,11 @@ class DownloadVideoController(APIView):
     ip_address = request.META['REMOTE_ADDR']
 
     if not request.user_uid:
-      temp_user = User.getUser(ip_address=ip_address)
+      user = User.getUser(ip_address=ip_address)
     else:
-      temp_user = User.getUser(uid=request.user_uid)
+      user = User.getUser(uid=request.user_uid)
 
-    temp_user.watch(video)
+    user.watch(video)
 
     filename = video.get_fileName(video_format)
     response = HttpResponse()
