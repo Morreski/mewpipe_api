@@ -9,7 +9,7 @@ from django.conf import settings
 from django.http import HttpResponse
 
 from rest_api.shortcuts import JsonResponse, get_by_uid, normalize_query
-from rest_api.models import Video, Tag, VideoTag, User
+from rest_api.models import Video, Tag, VideoTag, User, UserAccount
 from rest_api.serializers import VideoSerializer, ShareSerializer
 from rest_api.paginators import VideoPaginator
 from rest_api.tasks import task_convert
@@ -147,7 +147,10 @@ class UploadVideoController(APIView):
     if video.status != Video.STATUS_NEW:
       return JsonResponse({}, status = 403)
 
+    author = UserAccount.objects.get(uid=request.user_uid)
+
     video.status = Video.STATUS_UPLOADING
+    video.author = author
     video.save()
 
     filename = request.FILES[request.FILES.keys()[0]].name #get only first file in request
@@ -215,7 +218,12 @@ class DownloadVideoController(APIView):
       return HttpResponse({}, status=400)
 
     ip_address = request.META['REMOTE_ADDR']
-    temp_user = User.getUser(ip_address=ip_address)
+
+    if not request.user_uid:
+      temp_user = User.getUser(ip_address=ip_address)
+    else:
+      temp_user = User.getUser(uid=request.user_uid)
+
     temp_user.watch(video)
 
     filename = video.get_fileName(video_format)
