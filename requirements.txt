@@ -4,3 +4,4 @@ pip
 nginx
 libav-tools
 libimage-exiftool-perl
+rabbitmq-server
