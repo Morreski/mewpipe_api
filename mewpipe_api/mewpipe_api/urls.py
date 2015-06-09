@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include(blog_urls))
 """
 
-from rest_api.views import FacebookLogin, Login, Logout, UserController, PasswordChange
+from rest_api.views import FacebookLogin, Login, Logout, UserController
 from django.conf.urls import include, url
 from django.contrib import admin
 
@@ -24,6 +24,5 @@ urlpatterns = [
     url(r'^api/login/$', Login.as_view(), name='rest_login'),
     #url(r'^api/logout/$', Logout.as_view(), name='rest_logout'),
     url(r'^api/user/$', UserController.as_view(), name='rest_user_details'),
-    url(r'^api/user/password/$', PasswordChange.as_view(), name='rest_password_change'),
     url(r'^api/facebook/$', FacebookLogin.as_view(), name='fb_login')
 ]

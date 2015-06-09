@@ -2,9 +2,8 @@ from django.views.generic.edit import FormView
 from django.contrib.auth import logout
 from django.http import HttpRequest
 from django.conf import settings
-from .serializers import UserDetailsSerializer, PasswordChangeSerializer, LoginSerializer
+from .serializers import UserDetailsSerializer, LoginSerializer
 
-from rest_framework.generics import GenericAPIView, RetrieveUpdateAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -16,7 +15,7 @@ from allauth.account.views import SignupView, ConfirmEmailView
 from allauth.account.utils import complete_signup
 from allauth.account import app_settings
 
-from rest_api.forms import UserAccountCreationForm
+from rest_api.forms import UserAccountCreationForm, UpdateProfileForm
 from rest_api.shortcuts import JsonResponse
 from rest_api.models import UserAccount, Video
 from rest_auth.registration.serializers import SocialLoginSerializer
@@ -108,10 +107,14 @@ class UserController(APIView, FormView):
       user_account = UserAccount.objects.get(uid=request.user_uid)
     except UserAccount.DoesNotExist:
       return JsonResponse({"error":"Wrong User"}, status=status.HTTP_401_UNAUTHORIZED)
-    serialized_user = UserDetailsSerializer(user, data=request.data)
-    if serialized_user.is_valid():
-      serialized_user.save()
+    
+    self.initial = {}
+    self.request.POST = self.request.DATA.copy()
+    form = UpdateProfileForm(self.request.POST, instance=user_account)
+    if form.is_valid():
+      self.user = form.save()
 
+      serialized_user = UserDetailsSerializer(self.user)
       secret = settings.TOKEN_SECRET
       token_payload = {"user" : serialized_user.data, "exp"  : int(time.time()) + settings.TOKEN_TTL}
       token = jwt.encode(
@@ -121,7 +124,7 @@ class UserController(APIView, FormView):
       )
 
       return JsonResponse({"token" : token, "user" : serialized_user.data},)
-    return Response(serialized_user.errors, status=status.HTTP_400_BAD_REQUEST)
+    return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
 
   def delete(self, request, *args, **kwargs):
     if not request.user_uid:
@@ -149,14 +152,3 @@ class UserController(APIView, FormView):
     resp = Response({"success": "User successfully deleted with all its videos"}, status=status.HTTP_200_OK)
     resp.no_token = True
     return resp
-
-class PasswordChange(GenericAPIView):
-
-  serializer_class = PasswordChangeSerializer
-
-  def post(self, request):
-    serializer = self.get_serializer(data=request.DATA)
-    if not serializer.is_valid():
-      return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    serializer.save()
-    return Response({"success": "New password has been saved."})
