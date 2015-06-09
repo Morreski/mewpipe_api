@@ -3,7 +3,8 @@ from django.contrib.auth import logout
 from django.conf import settings
 from .serializers import UserDetailsSerializer, LoginSerializer
 
-from rest_framework.views import APIView, GenericAPIView
+from rest_framework.views import APIView
+from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -41,7 +42,7 @@ class Login(APIView):
       return JsonResponse({"error":"User does not exist"}, status=status.HTTP_401_UNAUTHORIZED)
 
     if not usr.check_password(s.data["password"]):
-      return JsonResponse({{"error":"Wrong password"}}, status=status.HTTP_401_UNAUTHORIZED)
+      return JsonResponse({"error":"Wrong password"}, status=status.HTTP_401_UNAUTHORIZED)
 
     serialized_user = UserDetailsSerializer(usr)
 
