@@ -3,7 +3,7 @@ from django.contrib.auth import logout
 from django.conf import settings
 from .serializers import UserDetailsSerializer, LoginSerializer
 
-from rest_framework.views import APIView
+from rest_framework.views import APIView, GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -36,14 +36,14 @@ class Login(APIView):
     if not s.is_valid():
       return JsonResponse(s.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    u = self.get_user(s.data['identifier'])
-    if u is None:
+    usr = self.get_user(s.data['identifier'])
+    if usr is None:
       return JsonResponse({"error":"User does not exist"}, status=status.HTTP_401_UNAUTHORIZED)
 
-    if not u.check_password(s.data["password"]):
+    if not usr.check_password(s.data["password"]):
       return JsonResponse({{"error":"Wrong password"}}, status=status.HTTP_401_UNAUTHORIZED)
 
-    serialized_user = UserDetailsSerializer(u)
+    serialized_user = UserDetailsSerializer(usr)
 
     #Let the magic do the work !
     secret = settings.TOKEN_SECRET
@@ -64,8 +64,28 @@ class Logout(APIView):
     logout(request)
     return Response({"success": "Successfully logged out."},status=status.HTTP_200_OK)
 
-class SocialLogin(Login):
+class SocialLogin(GenericAPIView):
+  permission_classes = (AllowAny,)
   serializer_class = SocialLoginSerializer
+
+  def login(self):
+    #DEFINIR WHAT TO DO
+    user_social = self.serializer.validated_data['user']
+    #user = self.get_user(user_social)
+
+
+  def get_response(self):
+    return Response({}, status=status.HTTP_200_OK)
+
+  def get_error_response(self):
+    return Response(self.serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+  def post(self, request, *args, **kwargs):
+    self.serializer = self.get_serializer(data=self.request.DATA)
+    if not self.serializer.is_valid():
+      return self.get_error_response()
+    self.login()
+    return self.get_response()
 
 class FacebookLogin(SocialLogin):
   adapter_class = FacebookOAuth2Adapter
