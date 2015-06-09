@@ -84,7 +84,6 @@ class VideoControllerGeneral(generics.ListCreateAPIView):
   def perform_create(self, serializer):
     author = UserAccount.objects.get(uid=self.request.user_uid)
     serializer.validated_data['author'] = author
-    print serializer.validated_data
     v = serializer.save()
     for tagName in self.tagNames:
       tagName = tagName.replace(' ', '').lower()
@@ -203,9 +202,6 @@ class ThumbnailVideoController(APIView):
 class DownloadVideoController(APIView):
 
   def get(self, request, *args, **kwargs):
-    print "*" * 60
-    print request.user_uid
-
     video_format = request.GET.get('video_format', "mp4")
 
     if video_format not in settings.SUPPORTED_VIDEO_FORMATS:

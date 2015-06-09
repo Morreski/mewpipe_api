@@ -8,15 +8,16 @@ class JwtAuth(object):
 
   def process_request(self, request):
     auth_header = request.META.get('HTTP_AUTHORIZATION')
-    if not auth_header:
+    auth_token = auth_header if auth_header is not None else request.GET.get('token')
+    if not auth_token:
       request.user_uid = None
       return
 
-    header_args = auth_header.split(' ')
-    if len(header_args) < 2:
-      token = header_args[0]
+    token_args = auth_token.split(' ')
+    if len(token_args) < 2:
+      token = token_args[0]
     else:
-      token = header_args[1]
+      token = token_args[1]
 
     try:
       token_data = jwt.decode(token, settings.TOKEN_SECRET)
