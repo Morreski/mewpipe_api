@@ -7,6 +7,7 @@ from hashlib import md5
 from django.db.models import Q
 import uuid, re
 
+
 def get_by_uid(Model, uid):
   try:
     return Model.objects.get(uid=uid)
@@ -80,6 +81,18 @@ class JsonResponse(HttpResponse):
     content = JSONRenderer().render(data)
     kwargs["content_type"] = 'application/json'
     HttpResponse.__init__(self, content, **kwargs)
+
+
+def login_required(f): #decorator for views
+
+  def wrapper(*args, **kwargs):
+    user_uid = args[1].user_uid
+    if user_uid:
+      return f(*args, **kwargs)
+    else:
+      return JsonResponse({}, status=401)
+
+  return wrapper
 
 def generate_uuid():
   return uuid.uuid4().hex

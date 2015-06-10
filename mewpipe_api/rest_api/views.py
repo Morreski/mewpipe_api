@@ -12,7 +12,7 @@ from rest_framework.permissions import AllowAny
 from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
 
 from rest_api.forms import UserAccountCreationForm, UpdateProfileForm
-from rest_api.shortcuts import JsonResponse
+from rest_api.shortcuts import JsonResponse, login_required
 from rest_api.models import UserAccount, Video
 from rest_auth.registration.serializers import SocialLoginSerializer
 import jwt, time
@@ -115,6 +115,7 @@ class UserController(APIView, FormView):
     else:
       return Response(self.form.errors, status=status.HTTP_400_BAD_REQUEST)
 
+  @login_required
   def put(self, request, *args, **kwargs):
     if not request.user_uid:
       return JsonResponse({}, status=status.HTTP_401_UNAUTHORIZED)
@@ -142,6 +143,7 @@ class UserController(APIView, FormView):
       return JsonResponse({"token" : token, "user" : serialized_user.data},)
     return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
 
+  @login_required
   def delete(self, request, *args, **kwargs):
     if not request.user_uid:
       return JsonResponse({"error":"Not authentified"}, status=status.HTTP_401_UNAUTHORIZED)

@@ -8,7 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.http import HttpResponse
 
-from rest_api.shortcuts import JsonResponse, get_by_uid, normalize_query
+from rest_api.shortcuts import JsonResponse, get_by_uid, normalize_query, login_required
 from rest_api.models import Video, Tag, VideoTag, User, UserAccount
 from rest_api.serializers import VideoSerializer, ShareSerializer
 from rest_api.paginators import VideoPaginator
@@ -139,6 +139,7 @@ class ShareController(View):
 class UploadVideoController(APIView):
   parsers = (parsers.FileUploadParser )
 
+  @login_required
   @atomic
   def post(self, request, *args, **kwargs):
     uid = kwargs['uid']
@@ -147,6 +148,11 @@ class UploadVideoController(APIView):
       return JsonResponse({}, status = 404)
 
     if video.status != Video.STATUS_NEW:
+      return JsonResponse({}, status = 403)
+
+    user = UserAccount.objects.get(uid=request.user_uid)
+
+    if user != video.author:
       return JsonResponse({}, status = 403)
 
     video.status = Video.STATUS_UPLOADING
