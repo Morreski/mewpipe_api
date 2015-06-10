@@ -49,7 +49,7 @@ class UpdateProfileForm(forms.ModelForm):
       'new_password_missing': _("If you want to modify your password please fill both of the new password fields.")
   }
 
-  current_password  = forms.CharField(label=_("Old password"), widget=forms.PasswordInput)
+  current_password = forms.CharField(label=_("Old password"), widget=forms.PasswordInput)
   new_password1 = forms.CharField(label=_("New password"), widget=forms.PasswordInput, required=False)
   new_password2 = forms.CharField(label=_("New password confirmartion"), widget=forms.PasswordInput, required=False,
     help_text=_("Enter the same password as above, for verification."))
@@ -86,7 +86,7 @@ class UpdateProfileForm(forms.ModelForm):
       code='duplicate_email'
     )
 
-  def clean_current_password(self):
+  def clean_current_passwordself):
     old = self.cleaned_data.get("current_password")
 
     if not self.instance.check_password(old):
