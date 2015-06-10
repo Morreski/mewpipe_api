@@ -166,6 +166,16 @@ class Video(BaseModel):
 
   search_indexes = ['title', 'description', 'tag__name']
 
+  def delete(self, *args,**kwargs):
+    for extension in settings.SUPPORTED_VIDEO_FORMATS:
+      name = str(self.uid)+ "." + extension
+      try:
+        os.remove(os.path.join(settings.UPLOAD_DIR, "videos", name))
+      except OSError:
+        pass
+
+    super(Video,self).delete(*args,**kwargs)
+
   def share(self, sender, dest_list, link):
     mail = Mail.objects.get(name="videoSharing")
     mail.send(sender, dest_list, link=link)

@@ -86,7 +86,7 @@ class UpdateProfileForm(forms.ModelForm):
       code='duplicate_email'
     )
 
-  def clean_current_passwordself):
+  def clean_current_password(self):
     old = self.cleaned_data.get("current_password")
 
     if not self.instance.check_password(old):
