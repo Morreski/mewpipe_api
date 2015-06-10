@@ -4,6 +4,7 @@ from rest_framework import filters
 from rest_framework.views import APIView
 
 from django.db.transaction import atomic
+from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.http import HttpResponse
@@ -58,10 +59,21 @@ class VideoControllerGeneral(generics.ListCreateAPIView):
 
   def list(self, request, *args, **kwargs):
     search_string = request.GET.get('s', '')
+
+    qs = self.get_queryset()
+
+    #Filter by privacy
+    if request.user_uid is None:
+      self.queryset = qs.exclude( Q(privacy_policy = Video.PRIVACY_PRIVATE) | Q(privacy_policy = Video.PRIVACY_PRIVATE_LINK) )
+
+    else:
+      user = UserAccount.objects.get(uid=request.user_uid)
+      self.queryset = qs.exclude( Q(privacy_policy = Video.PRIVACY_PRIVATE_LINK) & ~Q(author = user) ) #exclude private link that doesn't belong to me
+    #End filtering
+
     if search_string == '':
       return generics.ListCreateAPIView.list(self, request, *args, **kwargs)
 
-    qs = self.get_queryset()
 
     match_sentences, match_tags, match_words = ([], [], [])
     terms = normalize_query(search_string)
@@ -107,6 +119,29 @@ class VideoControllerSpecific(generics.RetrieveUpdateDestroyAPIView):
   queryset = Video.objects.all()
   serializer_class = VideoSerializer
   lookup_field = 'uid'
+
+  @login_required
+  def put(self, request, uid, *args, **kwargs):
+    if UserAccount.objects.get(uid=request.user_uid) != Video.objects.get(uid=uid).author:
+      return JsonResponse({}, status=403)
+
+    return generics.RetrieveUpdateDestroyAPIView.put(self, request, uid, *args, **kwargs)
+
+
+  @login_required
+  def patch(self, request, uid, *args, **kwargs):
+    if UserAccount.objects.get(uid=request.user_uid) != Video.objects.get(uid=uid).author:
+      return JsonResponse({}, status=403)
+
+    return generics.RetrieveUpdateDestroyAPIView.patch(self, request, uid, *args, **kwargs)
+
+
+  @login_required
+  def delete(self, request, uid, *args, **kwargs):
+    if UserAccount.objects.get(uid=request.user_uid) != Video.objects.get(uid=uid).author:
+      return JsonResponse({}, status=403)
+
+    return generics.RetrieveUpdateDestroyAPIView.delete(self, request, uid, *args, **kwargs)
 
   def perform_update(self, serializer):
     v = serializer.save()
