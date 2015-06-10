@@ -23,8 +23,19 @@ class VideoControllerGeneral(generics.ListCreateAPIView):
 
   serializer_class = VideoSerializer
   pagination_class = VideoPaginator
-  filter_backends = (filters.OrderingFilter, )
+  filter_backends = (filters.DjangoFilterBackend, filters.OrderingFilter )
   filter_fields = (
+      'tag__name',
+      'author__username',
+      'status',
+      'title',
+      'creation_date',
+      'edition_date',
+      'total_view_count',
+      'total_share_count',
+  )
+
+  ordering_fields = (
       'tag__name',
       'title',
       'creation_date',
@@ -41,7 +52,7 @@ class VideoControllerGeneral(generics.ListCreateAPIView):
       'weekly_share',
       'yearly_share',
   )
-  ordering_fields = filter_fields
+
   queryset = Video.objects.all()
 
 
