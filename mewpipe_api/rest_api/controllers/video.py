@@ -120,6 +120,14 @@ class VideoControllerSpecific(generics.RetrieveUpdateDestroyAPIView):
   serializer_class = VideoSerializer
   lookup_field = 'uid'
 
+  def get(self, request, uid, *args, **kwargs):
+
+    if request.user_uid is None and Video.objects.get(uid=uid).privacy_policy == Video.PRIVACY_PRIVATE:
+      return JsonResponse({}, status=403)
+
+    return generics.RetrieveUpdateDestroyAPIView.get(self, request, uid, *args, **kwargs)
+
+
   @login_required
   def put(self, request, uid, *args, **kwargs):
     if UserAccount.objects.get(uid=request.user_uid) != Video.objects.get(uid=uid).author:
