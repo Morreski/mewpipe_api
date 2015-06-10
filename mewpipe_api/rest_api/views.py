@@ -73,6 +73,7 @@ class SocialLogin(GenericAPIView):
   def login(self):
     #DEFINIR WHAT TO DO
     user_social = self.serializer.validated_data['user']
+    print user_social
     #user = self.get_user(user_social)
 
 
