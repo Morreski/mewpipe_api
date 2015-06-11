@@ -20,7 +20,7 @@ class UserAccountCreationForm(forms.ModelForm):
 
   class Meta:
     model = UserAccount
-    exclude = ['is_staff', 'is_active', 'date_joined', 'watched', 'password']
+    exclude = ['is_staff', 'is_active', 'date_joined', 'watched', 'password', 'auth_provider']
 
   def clean_password2(self):
     password1 = self.cleaned_data.get("password1")
@@ -45,7 +45,7 @@ class UpdateProfileForm(forms.ModelForm):
       'duplicate_username': _("This username is already in use."),
       'duplicate_email': _("This email adress is already in use."),
       'password_mismatch': _("The two password are not similar."),
-      'oldpass_error': _("The old password is not correct."), 
+      'oldpass_error': _("The old password is not correct."),
       'new_password_missing': _("If you want to modify your password please fill both of the new password fields.")
   }
 
