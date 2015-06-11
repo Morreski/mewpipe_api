@@ -35,6 +35,7 @@ INSTALLED_APPS = (
     #External Libs
     'django_extensions',
     'djcelery',
+    'social.apps.django_app.default',
 
     'rest_framework',
     'rest_framework.authtoken',
@@ -79,6 +80,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social.apps.django_app.context_processors.backends',
+                'social.apps.django_app.context_processors.login_redirect',
             ],
         },
     },
@@ -110,3 +113,12 @@ STATIC_URL = '/static/'
 
 AUTH_USER_MODEL = "rest_api.UserAccount"
 SOCIAL_AUTH_USER_MODEL = "rest_api.UserAccount"
+
+SOCIAL_AUTH_PIPELINE = (
+    'social.pipeline.social_auth.social_details',
+    'social.pipeline.social_auth.social_uid',
+    'social.pipeline.social_auth.social_user',
+    'social.pipeline.social_auth.associate_user',
+    'social.pipeline.social_auth.load_extra_data',
+    'social.pipeline.user.user_details'
+)
