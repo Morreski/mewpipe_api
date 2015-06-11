@@ -256,6 +256,7 @@ class ThumbnailVideoController(APIView):
     response['Content-Type'] = "image/jpg"
     response['Content-Disposition'] = 'inline; filename="{0}"'.format(filename)
     response['X-Accel-Redirect'] = "/thumbnails/{filename}".format(filename=filename)
+    response['X-Sendfile'] = "/thumbnails/{filename}".format(filename=filename)
     return response
 
 
@@ -290,4 +291,5 @@ class DownloadVideoController(APIView):
     response['Content-Type'] = "video/{0}".format(video_format)
     response['Content-Disposition'] = 'inline; filename="{0}.{1}"'.format(uid, video_format)
     response['X-Accel-Redirect'] = "/videos/{filename}".format(filename=filename)
+    response['X-Sendfile'] = "/videos/{filename}".format(filename=filename)
     return response
