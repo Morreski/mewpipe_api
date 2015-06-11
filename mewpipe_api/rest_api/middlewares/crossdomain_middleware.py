@@ -11,7 +11,7 @@ try:
     XS_SHARING_ALLOWED_METHODS = settings.XS_SHARING_ALLOWED_METHODS
     XS_SHARING_ALLOWED_HEADERS = settings.XS_SHARING_ALLOWED_HEADERS
 except:
-    XS_SHARING_ALLOWED_ORIGINS = '*'
+    XS_SHARING_ALLOWED_ORIGINS = 'http://mewpipe.ang'
     XS_SHARING_ALLOWED_METHODS = ['POST','GET','OPTIONS', 'PUT', 'DELETE']
     XS_SHARING_ALLOWED_HEADERS = ['Content-Type', 'application/json', 'Authorization']
 
@@ -29,7 +29,7 @@ class XsSharing(object):
             response['Access-Control-Allow-Origin']  = XS_SHARING_ALLOWED_ORIGINS
             response['Access-Control-Allow-Methods'] = ",".join( XS_SHARING_ALLOWED_METHODS )
             response['Access-Control-Allow-Headers'] = ",".join(XS_SHARING_ALLOWED_HEADERS)
-
+            response['Access-Control-Allow-Credentials']  = 'true'
             return response
 
         return None
@@ -42,4 +42,5 @@ class XsSharing(object):
         response['Access-Control-Allow-Origin']  = XS_SHARING_ALLOWED_ORIGINS
         response['Access-Control-Allow-Methods'] = ",".join( XS_SHARING_ALLOWED_METHODS )
         response['Access-Control-Allow-Headers'] = ",".join(XS_SHARING_ALLOWED_HEADERS)
+        response['Access-Control-Allow-Credentials']  = 'true'
         return response

@@ -9,12 +9,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 
-from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
-
 from rest_api.forms import UserAccountCreationForm, UpdateProfileForm
 from rest_api.shortcuts import JsonResponse, login_required
 from rest_api.models import UserAccount, Video
-from rest_auth.registration.serializers import SocialLoginSerializer
 import jwt, time
 
 
@@ -65,33 +62,6 @@ class Logout(APIView):
   def post(self, request):
     logout(request)
     return Response({"success": "Successfully logged out."},status=status.HTTP_200_OK)
-
-class SocialLogin(GenericAPIView):
-  permission_classes = (AllowAny,)
-  serializer_class = SocialLoginSerializer
-
-  def login(self):
-    #DEFINIR WHAT TO DO
-    user_social = self.serializer.validated_data['user']
-    print user_social
-    #user = self.get_user(user_social)
-
-
-  def get_response(self):
-    return Response({}, status=status.HTTP_200_OK)
-
-  def get_error_response(self):
-    return Response(self.serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-  def post(self, request, *args, **kwargs):
-    self.serializer = self.get_serializer(data=self.request.DATA)
-    if not self.serializer.is_valid():
-      return self.get_error_response()
-    self.login()
-    return self.get_response()
-
-class FacebookLogin(SocialLogin):
-  adapter_class = FacebookOAuth2Adapter
 
 class UserController(APIView, FormView):
 

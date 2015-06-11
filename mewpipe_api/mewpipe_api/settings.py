@@ -1,4 +1,5 @@
 from .settings_local import *
+from .social_settings import *
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
@@ -37,15 +38,8 @@ INSTALLED_APPS = (
 
     'rest_framework',
     'rest_framework.authtoken',
-    'rest_auth',
 
-    'allauth',
-    'allauth.account',
-    'rest_auth.registration',
-
-    'allauth.socialaccount',
-    'allauth.socialaccount.providers.facebook',
-
+    #Us
     'rest_api',
 )
 
@@ -67,7 +61,7 @@ APPEND_SLASH=False
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
-    'rest_framework.authentication.TokenAuthentication'
+    'social.backends.facebook.FacebookOAuth2'
 )
 
 ROOT_URLCONF = 'mewpipe_api.urls'
@@ -85,7 +79,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'allauth.socialaccount.context_processors.socialaccount',
             ],
         },
     },
@@ -116,4 +109,4 @@ STATIC_URL = '/static/'
 # DJANGO ALLAUTH
 
 AUTH_USER_MODEL = "rest_api.UserAccount"
-SOCIALACCOUNT_EMAIL_VERIFICATION = False
+SOCIAL_AUTH_USER_MODEL = "rest_api.UserAccount"

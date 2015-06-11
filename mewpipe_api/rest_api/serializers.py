@@ -1,7 +1,5 @@
 from django.contrib.auth import get_user_model
-
 from rest_framework import serializers
-
 from rest_api.models import Video, Tag
 from rest_api.shortcuts import HtmlCleanField
 

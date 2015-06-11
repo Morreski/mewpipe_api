@@ -4,8 +4,7 @@ djangorestframework
 django-filter
 mySQL
 pyyaml
-django-rest-auth
-django-allauth
+python-social-auth
 uwsgi
 pyjwt
 celery
