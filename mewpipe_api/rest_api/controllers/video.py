@@ -235,16 +235,16 @@ class ThumbnailVideoController(APIView):
     uid = kwargs['uid']
 
     try:
-      time = int(self.request.GET.get('t'))
+      time = int(self.request.GET.get('t', -1))
     except:
-      time = 0
+      time = -1
 
     video = get_by_uid(Video, uid)
 
     if video is None:
       return HttpResponse({}, status=404)
 
-    if not time:
+    if time < 0:
       time = video.thumbnail_frame
 
     filename = "{uid}_{number}.jpg".format(
