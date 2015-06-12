@@ -10,11 +10,11 @@ from django.conf import settings
 from django.http import HttpResponse
 
 from rest_api.shortcuts import JsonResponse, get_by_uid, normalize_query, login_required
+from rest_api.videoconverter import get_video_duration
 from rest_api.models import Video, Tag, VideoTag, User, UserAccount
 from rest_api.serializers import VideoSerializer, ShareSerializer
 from rest_api.paginators import VideoPaginator
-from rest_api.tasks import task_convert
-from rest_api.videoconverter import extract_thumbnails_and_datas
+from rest_api.tasks import task_convert, task_thumbnails
 
 from django.views.generic import View
 import itertools
@@ -223,7 +223,11 @@ class UploadVideoController(APIView):
       return JsonResponse({"file" : "Video size too large"}, status=413)
 
     video.writeOnDisk(file, ext)
-    extract_thumbnails_and_datas(video, ext)
+
+    video.duration = get_video_duration(video, ext)
+    video.save()
+
+    task_thumbnails.delay(video, ext)
     task_convert.delay(video, ext)
 
     return JsonResponse({})

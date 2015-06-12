@@ -10,13 +10,9 @@ def get_video_metadatas(video_path):
   out = check_output("exiftool -j %s" % video_path, shell=True)
   return json.loads(out)[0]
 
-def extract_thumbnails_and_datas(video, ext):
+def get_video_duration(video, ext):
   name = str(video.uid)
   input_path = os.path.join(settings.UPLOAD_DIR, "pending_videos", name + '.' + ext)
-  thumbnail_path = os.path.join(settings.UPLOAD_DIR, "thumbnails", name + '_')
-
-  if not os.path.exists(os.path.dirname(thumbnail_path)):
-      os.makedirs(os.path.dirname(thumbnail_path))
 
   video_metadatas = get_video_metadatas(input_path)
 
@@ -34,15 +30,27 @@ def extract_thumbnails_and_datas(video, ext):
   except:
     total_seconds = int(video_metadatas.get("Duration", "00.00 s").split(".")[0])
 
+  return total_seconds
+
+def extract_thumbnails_and_datas(video, ext):
+  name = str(video.uid)
+  input_path = os.path.join(settings.UPLOAD_DIR, "pending_videos", name + '.' + ext)
+  thumbnail_path = os.path.join(settings.UPLOAD_DIR, "thumbnails", name + '_')
+
+  if not os.path.exists(os.path.dirname(thumbnail_path)):
+      os.makedirs(os.path.dirname(thumbnail_path))
+
+  total_seconds = video.duration
+
   if total_seconds == 0:
     return
 
-  if total_seconds < settings.THUMBNAIL_COUNT:
-    frames = total_seconds
-    fps = 1
-  else:
-    frames = settings.THUMBNAIL_COUNT
-    fps = total_seconds / frames
+  #if total_seconds < settings.THUMBNAIL_COUNT:
+  frames = total_seconds
+  fps = 1
+  #else:
+  #  frames = settings.THUMBNAIL_COUNT
+  #  fps = total_seconds / frames
 
   for i in range(0, frames+1):
     thumb_command = "avconv -ss {position} -i {input} -vframes 1 {output} -loglevel quiet".format(
@@ -53,7 +61,7 @@ def extract_thumbnails_and_datas(video, ext):
     check_output(thumb_command, shell=True)
 
   video.duration = total_seconds
-  video.save()
+  video.save(update_fields=["duration"])
 
 def convert(video, ext, **kwargs):
   name = str(video.uid)
