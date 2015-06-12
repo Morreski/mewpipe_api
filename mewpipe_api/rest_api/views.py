@@ -199,6 +199,7 @@ class FacebookLogin(APIView):
     password = uuid.uuid4
     try:
       user = UserAccount(username=graph_dict["name"], first_name=graph_dict["first_name"], last_name=graph_dict["last_name"], email=graph_dict["email"], password=password)
+      user.fb_uid = graph_dict["id"]
       user.save()
     except:
       return JsonResponse({"error": "Could not create the user"},status=status.HTTP_400_BAD_REQUEST)
