@@ -20,7 +20,7 @@ class UserAccountCreationForm(forms.ModelForm):
 
   class Meta:
     model = UserAccount
-    exclude = ['is_staff', 'is_active', 'date_joined', 'watched', 'password', 'auth_provider']
+    exclude = ['is_staff', 'is_active', 'date_joined', 'watched', 'password']
 
   def clean_password2(self):
     password1 = self.cleaned_data.get("password1")

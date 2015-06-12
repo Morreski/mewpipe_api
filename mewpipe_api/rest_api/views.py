@@ -12,6 +12,9 @@ from rest_framework.permissions import AllowAny
 from rest_api.forms import UserAccountCreationForm, UpdateProfileForm
 from rest_api.shortcuts import JsonResponse, login_required
 from rest_api.models import UserAccount, Video
+
+from open_facebook.api import FacebookAuthorization
+from open_facebook.exceptions import ParameterException
 import jwt, time
 
 
@@ -71,10 +74,6 @@ class UserController(APIView, FormView):
   def form_valid(self, form):
     self.user = form.save(self.request)
 
-  def get_response(self):
-    serializer = self.serializer_class(instance=self.user)
-    return Response(serializer.data, status=status.HTTP_201_CREATED)
-
   def post(self, request, *args, **kwargs):
     self.initial = {}
     self.request.POST = self.request.DATA.copy()
@@ -82,7 +81,18 @@ class UserController(APIView, FormView):
     self.form = self.get_form(form_class)
     if self.form.is_valid():
       self.user = self.form.save(self.request)
-      return self.get_response()
+
+      serialized_user = self.serializer_class(instance=self.user)
+
+      secret = settings.TOKEN_SECRET
+      token_payload = {"user" : serialized_user.data, "exp"  : int(time.time()) + settings.TOKEN_TTL}
+      token = jwt.encode(
+        token_payload,
+        secret,
+        algorithm="HS256"
+      )
+
+      return Response({"token" : token}, status=status.HTTP_201_CREATED)
     else:
       return Response(self.form.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -142,3 +152,21 @@ class UserController(APIView, FormView):
     resp.no_token = True
     return resp
 
+class FacebookLogin(APIView):
+
+  def post(self, request, *args, **kwargs):
+    code = request.data["code"]
+    redirect = request.data["redirectUri"]
+    client_id = request.data["clientId"]
+    try:
+      res = FacebookAuthorization.convert_code(code=code, redirect_uri=redirect)
+    except ParameterException:
+      return Response({"error": "Wrong code"},status=status.HTTP_400_BAD_REQUEST)
+    except:
+      return Response({"error": "Something went wrong during the authentication."},status=status.HTTP_400_BAD_REQUEST)
+
+    access_token = res["access_token"]
+    expires = res["expires"]
+
+
+    return Response({"success": "Success"},status=status.HTTP_200_OK)

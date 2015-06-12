@@ -90,30 +90,19 @@ class CustomUserManager(BaseUserManager):
   use_in_migrations = True
 
 class UserAccount(AbstractBaseUser, User, PermissionsMixin):
-  AUTH_STANDARD = 0
-  AUTH_FACEBOOK = 0
-
-  AUTH_PROVIDER_CHOICES = (
-    (AUTH_STANDARD, "Standard auth"),
-    (AUTH_FACEBOOK, "Facebook auth")
-  )
-
-  auth_provider = models.IntegerField(choices=AUTH_PROVIDER_CHOICES, default=0)
-  username    = models.CharField(_('Username'), max_length = 50)
+  username    = models.CharField(_('Username'), max_length = 50, unique=True)
   email       = models.EmailField(_('Email address'), max_length=254, unique=True)
   first_name  = models.CharField(_('First name'), max_length=50, blank=True)
   last_name   = models.CharField(_('Last name'), max_length=50, blank=True)
   is_staff    = models.BooleanField(_('is staff'), default=False)
   is_active   = models.BooleanField(_('is active'), default=True)
   date_joined = models.DateTimeField(_('Join date'), auto_now_add=True)
+  fb_uid      = models.CharField(_('Uid Facebook'), max_length=50, blank=True)
 
   objects = CustomUserManager()
   USERNAME_FIELD = 'username'
 
   serialized = ('first_name', 'last_name', 'email', 'username', 'birth_date', 'is_active')
-
-  class Meta:
-    unique_together = ("username", "auth_provider")
 
 class Video(BaseModel):
 

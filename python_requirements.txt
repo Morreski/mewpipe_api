@@ -4,8 +4,9 @@ djangorestframework
 django-filter
 mySQL
 pyyaml
-python-social-auth
 uwsgi
 pyjwt
 celery
 django-celery
+Pillow
+django_facebook
