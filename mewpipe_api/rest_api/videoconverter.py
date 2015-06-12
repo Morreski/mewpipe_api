@@ -38,7 +38,7 @@ def extract_thumbnails_and_datas(video, ext):
     return
 
   if total_seconds < 100:
-    frames = total_seconds 
+    frames = total_seconds
     fps = 1
   else:
     frames = settings.THUMBNAIL_COUNT
@@ -64,9 +64,14 @@ def convert(video, ext, **kwargs):
       os.makedirs(os.path.dirname(output_path))
 
   for extension in settings.SUPPORTED_VIDEO_FORMATS:
-    command = "avconv -y -i {input} -strict experimental {output} -loglevel quiet".format(
-      input = input_path,
-      output = output_path + "." + extension
+    acodec_arg = ''
+    if ext == extension:
+      acodec_arg = '-acodec copy'
+
+    command = "avconv -y -i {input} -strict experimental {acodec} {output} -loglevel quiet".format(
+      input  = input_path,
+      output = output_path + "." + extension,
+      acodec = acodec_arg
     )
     check_output(command, shell=True)
 
