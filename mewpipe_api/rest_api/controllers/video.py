@@ -17,7 +17,7 @@ from rest_api.paginators import VideoPaginator
 from rest_api.tasks import task_convert, task_thumbnails
 
 from django.views.generic import View
-import itertools
+import os, itertools
 
 
 class VideoControllerGeneral(generics.ListCreateAPIView):
@@ -255,6 +255,11 @@ class ThumbnailVideoController(APIView):
       uid = str(video.uid),
       number = time + 1 #+1 cause of ffmpeg output
     )
+
+    thumbnail_path = os.path.join(settings.UPLOAD_DIR, "thumbnails", filename)
+
+    if not os.path.isfile(thumbnail_path) and video.status == 2:
+      filename = "default.jpg"
 
     response = HttpResponse()
     response['Content-Type'] = "image/jpg"
