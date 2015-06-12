@@ -37,7 +37,7 @@ def extract_thumbnails_and_datas(video, ext):
   if total_seconds == 0:
     return
 
-  if total_seconds < 100:
+  if total_seconds < settings.THUMBNAIL_COUNT:
     frames = total_seconds
     fps = 1
   else:
