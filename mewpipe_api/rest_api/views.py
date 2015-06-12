@@ -11,10 +11,10 @@ from rest_framework.permissions import AllowAny
 
 from rest_api.forms import UserAccountCreationForm, UpdateProfileForm
 from rest_api.shortcuts import JsonResponse, login_required
-from rest_api.models import UserAccount, Video
+from rest_api.models import UserAccount, Video, Mail
 
-from open_facebook.api import FacebookAuthorization
-from open_facebook.exceptions import ParameterException
+from open_facebook.api import FacebookAuthorization, OpenFacebook
+from open_facebook.exceptions import ParameterException, OAuthException
 import jwt, time
 
 
@@ -121,7 +121,7 @@ class UserController(APIView, FormView):
         algorithm="HS256"
       )
 
-      return JsonResponse({"token" : token, "user" : serialized_user.data},)
+      return JsonResponse({"token" : token}, status=status.HTTP_200_CREATED)
     return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
 
   @login_required
@@ -141,14 +141,14 @@ class UserController(APIView, FormView):
         try:
           vid.delete()
         except:
-          return Response({"error":"Unable to delete all the videos"}, status=status.HTTP_400_BAD_REQUEST)
+          return JsonResponse({"error":"Unable to delete all the videos"}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
       user_account.delete()
     except:
-      return Response({"error":"Unable to delete the User"}, status=status.HTTP_400_BAD_REQUEST)
+      return JsonResponse({"error":"Unable to delete the User"}, status=status.HTTP_400_BAD_REQUEST)
 
-    resp = Response({"success": "User successfully deleted with all its videos"}, status=status.HTTP_200_OK)
+    resp = JsonResponse({"success": "User successfully deleted with all its videos"}, status=status.HTTP_200_OK)
     resp.no_token = True
     return resp
 
@@ -161,12 +161,58 @@ class FacebookLogin(APIView):
     try:
       res = FacebookAuthorization.convert_code(code=code, redirect_uri=redirect)
     except ParameterException:
-      return Response({"error": "Wrong code"},status=status.HTTP_400_BAD_REQUEST)
+      return JsonResponse({"error": "Wrong code"},status=status.HTTP_400_BAD_REQUEST)
     except:
-      return Response({"error": "Something went wrong during the authentication."},status=status.HTTP_400_BAD_REQUEST)
+      return JsonResponse({"error": "Something went wrong during the authentication."},status=status.HTTP_400_BAD_REQUEST)
 
     access_token = res["access_token"]
     expires = res["expires"]
 
+    graph = OpenFacebook(access_token)
+    try:
+      graph_dict = graph.get('me', fields='id,first_name, last_name, email, name')
+      print graph_dict
+    except OAuthException:
+      return JsonResponse({"error": "Wrong access token"},status=status.HTTP_400_BAD_REQUEST)
+    except:
+      return JsonResponse({"error": "Something went wrong during the authentication."},status=status.HTTP_400_BAD_REQUEST)
 
-    return Response({"success": "Success"},status=status.HTTP_200_OK)
+    if UserAccount.user_exists_for_email(graph_dict["email"]):
+      user = UserAccount.objects.get(email=graph_dict["email"])
+      user.fb_uid = graph_dict["id"]
+
+      serialized_user = UserDetailsSerializer(user)
+      secret = settings.TOKEN_SECRET
+      token_payload = {"user" : serialized_user.data, "exp"  : int(time.time()) + settings.TOKEN_TTL}
+      token = jwt.encode(
+        token_payload,
+        secret,
+        algorithm="HS256"
+      )
+      return JsonResponse({"token" : token}, status=status.HTTP_200_OK)
+
+    fields = ["id", "first_name", "last_name", "email", "name"]
+    for field in fields:
+      if field not in graph_dict:
+        return JsonResponse({"error": "Cannot get field : " + field},status=status.HTTP_400_BAD_REQUEST)
+
+    password = uuid.uuid4
+    try:
+      user = UserAccount(username=graph_dict["name"], first_name=graph_dict["first_name"], last_name=graph_dict["last_name"], email=graph_dict["email"], password=password)
+      user.save()
+    except:
+      return JsonResponse({"error": "Could not create the user"},status=status.HTTP_400_BAD_REQUEST)
+
+    mail = Mail.objects.get(name="newFacebookAccount")
+    mail.send("mewpipe@ang.fr", user.email, password=password)
+
+    serialized_user = UserDetailsSerializer(user)
+    secret = settings.TOKEN_SECRET
+    token_payload = {"user" : serialized_user.data, "exp"  : int(time.time()) + settings.TOKEN_TTL}
+    token = jwt.encode(
+      token_payload,
+      secret,
+      algorithm="HS256"
+    )
+
+    return JsonResponse({"token" : token}, status=status.HTTP_200_OK)

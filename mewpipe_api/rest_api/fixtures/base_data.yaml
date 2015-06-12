@@ -10,3 +10,17 @@
       Watch it there: {link}
   model: rest_api.mail
   pk: 1
+
+- fields:
+    name: "newFacebookAccount"
+    creation_date: "2015-06-10 00:00:00"
+    edition_date: "2015-06-10 00:00:00"
+    subject: "[MewPipe] - Your password"
+    body_template: |
+      Hello !
+      You created an account on Mewpipe using your facebook profile.
+      Here is your password : {password}
+      
+      We strongly suggest you to change it the next time you log in.
+  model: rest_api.mail
+  pk: 2

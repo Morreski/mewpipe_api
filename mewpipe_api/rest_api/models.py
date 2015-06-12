@@ -23,7 +23,6 @@ class VideoManager(models.Manager):
         yearly_view = models.F("total_view_count") - models.F("yearly_view_count"),
     )
 
-
 class BaseModel(models.Model):
   uid = models.UUIDField(default=uuid.uuid4, editable=False)
   creation_date = models.DateTimeField(auto_now_add=True)
@@ -102,7 +101,15 @@ class UserAccount(AbstractBaseUser, User, PermissionsMixin):
   objects = CustomUserManager()
   USERNAME_FIELD = 'username'
 
-  serialized = ('first_name', 'last_name', 'email', 'username', 'birth_date', 'is_active')
+  serialized = ('first_name', 'last_name', 'email', 'username')
+
+  @staticmethod
+  def user_exists_for_email(email):
+    try:
+      UserAccount.objects.get(email=email)
+    except UserAccount.DoesNotExist:
+      return False
+    return True
 
 class Video(BaseModel):
 
