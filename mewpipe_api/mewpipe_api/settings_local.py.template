@@ -13,6 +13,8 @@ EMAIL_PORT = 25
 PAGINATION_LIMIT = 100
 VIDEO_PAGINATION_LIMIT = 25
 
+THUMBNAIL_COUNT = 50 #Max number of thumbnails for a video
+
 UPLOAD_DIR = "." #File upload destination
 
 

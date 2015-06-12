@@ -61,7 +61,7 @@ class VideoControllerGeneral(generics.ListCreateAPIView):
     search_string = request.GET.get('s', '')
 
     qs = self.get_queryset()
-
+    qs = self.filter_queryset(qs)
     #Filter by privacy
     if request.user_uid is None:
       self.queryset = qs.exclude( Q(privacy_policy = Video.PRIVACY_PRIVATE) | Q(privacy_policy = Video.PRIVACY_PRIVATE_LINK) )

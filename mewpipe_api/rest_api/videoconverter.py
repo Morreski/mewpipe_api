@@ -13,7 +13,7 @@ def get_video_metadatas(video_path):
 def extract_thumbnails_and_datas(video, ext):
   name = str(video.uid)
   input_path = os.path.join(settings.UPLOAD_DIR, "pending_videos", name + '.' + ext)
-  thumbnail_path = os.path.join(settings.UPLOAD_DIR, "thumbnails", name + "_%d.jpg")
+  thumbnail_path = os.path.join(settings.UPLOAD_DIR, "thumbnails", name + '_')
 
   if not os.path.exists(os.path.dirname(thumbnail_path)):
       os.makedirs(os.path.dirname(thumbnail_path))
@@ -34,11 +34,23 @@ def extract_thumbnails_and_datas(video, ext):
   except:
     total_seconds = int(video_metadatas.get("Duration", "00.00 s").split(".")[0])
 
-  thumb_command = "avconv -i {input} -vf fps=1 {output} -loglevel quiet".format(
-    input = input_path,
-    output = thumbnail_path
-  )
-  check_output(thumb_command, shell=True)
+  if total_seconds == 0:
+    return
+
+  if total_seconds < 100:
+    frames = total_seconds 
+    fps = 1
+  else:
+    frames = settings.THUMBNAIL_COUNT
+    fps = total_seconds / frames
+
+  for i in range(0, frames+1):
+    thumb_command = "avconv -ss {position} -i {input} -vframes 1 {output} -loglevel quiet".format(
+      position = i*fps,
+      input = input_path,
+      output = thumbnail_path + str(i+1) + '.jpg'
+    )
+    check_output(thumb_command, shell=True)
 
   video.duration = total_seconds
   video.save()
