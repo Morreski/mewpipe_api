@@ -141,3 +141,4 @@ class UserController(APIView, FormView):
     resp = Response({"success": "User successfully deleted with all its videos"}, status=status.HTTP_200_OK)
     resp.no_token = True
     return resp
+
