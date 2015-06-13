@@ -4,19 +4,16 @@ from django.conf import settings
 from .serializers import UserDetailsSerializer, LoginSerializer
 
 from rest_framework.views import APIView
-from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.permissions import AllowAny
 
-from rest_api.forms import UserAccountCreationForm, UpdateProfileForm
+from rest_api.forms import UpdateProfileForm
 from rest_api.shortcuts import JsonResponse, login_required
 from rest_api.models import UserAccount, Video, Mail
 
 from open_facebook.api import FacebookAuthorization, OpenFacebook
 from open_facebook.exceptions import ParameterException, OAuthException
-import jwt, time
-
+import jwt, time, uuid
 
 class Login(APIView):
 
@@ -196,7 +193,7 @@ class FacebookLogin(APIView):
       if field not in graph_dict:
         return JsonResponse({"error": "Cannot get field : " + field},status=status.HTTP_400_BAD_REQUEST)
 
-    password = uuid.uuid4
+    password = uuid.uuid4().hex[:10]
     try:
       user = UserAccount(username=graph_dict["name"], first_name=graph_dict["first_name"], last_name=graph_dict["last_name"], email=graph_dict["email"], password=password)
       user.fb_uid = graph_dict["id"]
@@ -205,7 +202,8 @@ class FacebookLogin(APIView):
       return JsonResponse({"error": "Could not create the user"},status=status.HTTP_400_BAD_REQUEST)
 
     mail = Mail.objects.get(name="newFacebookAccount")
-    mail.send("mewpipe@ang.fr", user.email, password=password)
+    mail.send("noreply@mewpipe.ang", (user.email, ), password=password)
+    print password
 
     serialized_user = UserDetailsSerializer(user)
     secret = settings.TOKEN_SECRET
